@@ -44,7 +44,6 @@ echo "============================================="
 echo ""
 
 # --- Configuration ---
-PYTHON_VERSION="3.11"
 PROJECT_DIR="${HOME}/pauline-neural-study"
 VENV_DIR="${PROJECT_DIR}/.venv"
 
@@ -62,13 +61,18 @@ echo "Detected OS: ${OS_NAME} ${OS_VERSION:-unknown}"
 echo "Project directory: ${PROJECT_DIR}"
 echo ""
 
+# --- Detect Python version ---
+PYTHON_VERSION=$(python3 -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")' 2>/dev/null || echo "3.10")
+echo "Detected Python: ${PYTHON_VERSION}"
+
 # --- System packages ---
 echo "[1/6] Installing system packages..."
 sudo apt-get update -qq
 sudo apt-get install -y -qq \
-    python${PYTHON_VERSION} \
-    python${PYTHON_VERSION}-venv \
-    python${PYTHON_VERSION}-dev \
+    python3 \
+    python3-venv \
+    "python${PYTHON_VERSION}-venv" \
+    python3-dev \
     python3-pip \
     git \
     curl \
@@ -76,12 +80,7 @@ sudo apt-get install -y -qq \
     build-essential \
     pkg-config \
     libhdf5-dev \
-    2>/dev/null
-
-# Ensure python3 points to the right version
-if ! command -v python3 &>/dev/null; then
-    sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python${PYTHON_VERSION} 1
-fi
+    2>/dev/null || true
 
 echo "  Python version: $(python3 --version)"
 echo ""
