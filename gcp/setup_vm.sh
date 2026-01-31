@@ -145,32 +145,30 @@ else
 fi
 echo ""
 
-# --- Download NLTK data ---
-echo "[5/6] Downloading NLTK data..."
-python3 -c "
-import nltk
-for resource in ['punkt', 'punkt_tab', 'averaged_perceptron_tagger',
-                 'averaged_perceptron_tagger_eng', 'stopwords']:
-    nltk.download(resource, quiet=True)
-print('  NLTK data downloaded successfully.')
-"
-echo ""
-
-# --- Fetch corpus data ---
-echo "[6/6] Fetching Pauline corpus..."
-mkdir -p "${PROJECT_DIR}/data"
+# --- Verify Greek corpus data ---
+echo "[5/6] Verifying Koine Greek corpus..."
 mkdir -p "${PROJECT_DIR}/output"
 
+CORPUS_COUNT=$(ls -1 "${PROJECT_DIR}/data/"*.txt 2>/dev/null | wc -l)
+if [ "${CORPUS_COUNT}" -eq 0 ]; then
+    echo "  ERROR: No Greek text files found in ${PROJECT_DIR}/data/"
+    echo "  The 14 Pauline epistle .txt files should be included in the repo."
+    exit 1
+fi
+echo "  Found ${CORPUS_COUNT} Greek text files"
+
+# --- Validate corpus loads correctly ---
+echo "[6/6] Validating corpus loading..."
 python3 -c "
 import sys
 sys.path.insert(0, '${PROJECT_DIR}/src')
-from pauline.corpus.fetch import CorpusFetcher
-fetcher = CorpusFetcher(data_dir='${PROJECT_DIR}/data')
-corpus = fetcher.fetch(undisputed_only=True)
-print(f'  Corpus fetched: {corpus.total_words} words, {corpus.vocabulary_size} unique')
-print(f'  Epistles: {corpus.epistle_names}')
-print(f'  Cached to: ${PROJECT_DIR}/data/pauline_corpus.json')
-" || echo "  WARNING: Corpus fetch failed. Will retry during analysis."
+from pauline.corpus.loader import PaulineCorpus
+corpus = PaulineCorpus.from_text_files('${PROJECT_DIR}/data', undisputed_only=False)
+summary = corpus.summary()
+print(f'  Corpus loaded: {summary[\"total_words\"]} words, {summary[\"vocabulary_size\"]} unique')
+print(f'  Epistles ({summary[\"epistles\"]}): {\", \".join(summary[\"epistle_names\"])}')
+print(f'  Language: {\"Greek\" if summary[\"is_greek\"] else \"English\"}')
+" || echo "  WARNING: Corpus validation failed. Check data/ directory."
 
 echo ""
 echo "============================================="

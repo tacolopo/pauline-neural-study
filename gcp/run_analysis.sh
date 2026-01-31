@@ -103,18 +103,14 @@ echo "============================================="
 echo ""
 
 # --- Check corpus availability ---
-if [ ! -f "${PROJECT_DIR}/data/pauline_corpus.json" ]; then
-    echo "Corpus not cached. Fetching from API..."
-    python3 -c "
-import sys
-sys.path.insert(0, '${PROJECT_DIR}/src')
-from pauline.corpus.fetch import CorpusFetcher
-fetcher = CorpusFetcher(data_dir='${PROJECT_DIR}/data')
-corpus = fetcher.fetch(undisputed_only=True)
-print(f'Corpus fetched: {corpus.total_words} words')
-"
-    echo ""
+CORPUS_COUNT=$(ls -1 "${PROJECT_DIR}/data/"*.txt 2>/dev/null | wc -l)
+if [ "${CORPUS_COUNT}" -eq 0 ]; then
+    echo "ERROR: No Greek text files found in ${PROJECT_DIR}/data/"
+    echo "The Koine Greek .txt files should be included in the repo."
+    exit 1
 fi
+echo "Greek corpus: ${CORPUS_COUNT} epistle files"
+echo ""
 
 # --- If GPU requested, modify config to include VAE phase ---
 if [ "${WITH_GPU}" = true ]; then
