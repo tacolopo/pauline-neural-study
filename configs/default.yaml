@@ -1,0 +1,169 @@
+# Pauline Neural Study - Default Configuration
+# ==============================================
+#
+# This config runs the core phases of the study:
+#   1. Corpus fetching (World English Bible, public domain)
+#   2. Multi-level bootstrap resampling
+#   3. Word embedding training with stability analysis
+#   4. Cross-epistle leave-one-out analysis
+#   5. Combinatorial recombination
+#   6. Fractal self-similarity analysis
+#   7. Semantic analysis and visualization
+#
+# For a quick test run, use: python -m pauline.pipeline --quick
+# For GPU-intensive phases (VAE), add "vae" to the phases list.
+
+corpus:
+  data_dir: "data"
+  undisputed_only: true      # Only the 7 undisputed Pauline epistles
+  source: "api"              # "api" (bible-api.com), "json", or "text_files"
+  translation: "web"         # World English Bible (public domain)
+  cache_file: "data/pauline_corpus.json"
+
+bootstrap:
+  n_samples: 1000            # Number of bootstrap resamples per level
+  levels:                    # Sampling granularity levels
+    - "sentence"
+    - "chapter"
+    - "epistle"
+  seed: 42
+
+embedding:
+  embedding_dim: 100         # Word2Vec vector dimensionality
+  window: 5                  # Context window size
+  min_count: 2               # Minimum word frequency to include
+  sg: 1                      # 1 = Skip-gram (better for small corpora)
+  epochs: 50                 # Training epochs per model
+  workers: 4                 # Parallel workers for training
+  top_n_neighbors: 10        # Neighbors to track for stability
+
+combinatorial:
+  n_sentences: 500           # Synthetic sentences to generate
+  min_length: 5              # Min tokens per sentence
+  max_length: 30             # Max tokens per sentence
+  bigram_threshold: 1        # Min bigram frequency for constrained generation
+  seed: 42
+
+cross_epistle:
+  method: "leave_one_out"    # "leave_one_out" or "all_subsets"
+  min_subset_size: 3         # For all_subsets: min epistles per subset
+
+fractal:
+  min_window: 4              # Minimum DFA window size
+  max_window: 256            # Maximum DFA window size
+  n_windows: 20              # Number of window sizes to test
+
+permutation:
+  max_sentences_per_unit: 8  # Max sentences in a permutable unit
+  n_permutations_per_unit: 20  # Permutations per argument unit
+  seed: 42
+
+vae:
+  latent_dim: 64             # VAE latent space dimensionality
+  hidden_dim: 256            # Hidden layer size
+  max_seq_length: 50         # Max sequence length (tokens)
+  batch_size: 32
+  n_epochs: 100
+  learning_rate: 0.001
+  kl_weight: 0.5             # KL divergence weight in loss
+
+bayesian:
+  n_topics: 10               # Number of latent theological topics
+  n_iterations: 1000         # Gibbs sampling iterations
+  alpha: 0.1                 # Document-topic prior
+  beta: 0.01                 # Topic-word prior
+
+analysis:
+  output_dir: "output"
+  generate_plots: true
+  save_embeddings: true
+  target_words:
+    # Justification / Righteousness semantic field
+    - "justification"
+    - "justified"
+    - "justify"
+    - "righteous"
+    - "righteousness"
+    # Faith semantic field
+    - "faith"
+    - "believe"
+    - "belief"
+    # Law semantic field
+    - "law"
+    - "commandment"
+    - "commandments"
+    # Grace semantic field
+    - "grace"
+    - "mercy"
+    - "gift"
+    # Sin semantic field
+    - "sin"
+    - "sins"
+    - "sinned"
+    - "sinner"
+    # Spirit/Flesh dichotomy
+    - "spirit"
+    - "flesh"
+    - "body"
+    # Christological terms
+    - "christ"
+    - "jesus"
+    - "lord"
+    - "god"
+    # Virtue terms
+    - "love"
+    - "hope"
+    - "peace"
+    # Death/Life
+    - "death"
+    - "life"
+    - "resurrection"
+    # Atonement
+    - "cross"
+    - "blood"
+    - "sacrifice"
+    # Ecclesiology
+    - "church"
+    - "members"
+    # Soteriology
+    - "salvation"
+    - "saved"
+    - "save"
+    - "gospel"
+    - "preach"
+    - "preaching"
+    # Identity markers
+    - "circumcision"
+    - "uncircumcision"
+    - "gentile"
+    - "gentiles"
+    - "jew"
+    - "jews"
+    # Patriarchs
+    - "abraham"
+    - "moses"
+    # Covenant
+    - "covenant"
+    - "promise"
+    - "promises"
+    # Divine attributes
+    - "glory"
+    - "power"
+    - "wisdom"
+    # Freedom
+    - "freedom"
+    - "slave"
+    - "bondage"
+    # Sacraments
+    - "baptism"
+    - "baptized"
+
+# Phases to execute (in order)
+phases:
+  - "corpus"
+  - "bootstrap"
+  - "embeddings"
+  - "cross_epistle"
+  - "combinatorial"
+  - "fractal"
+  - "analysis"
