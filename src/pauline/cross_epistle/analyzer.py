@@ -36,7 +36,6 @@ from typing import Optional
 import numpy as np
 from scipy.spatial.distance import cosine
 
-import nltk
 from gensim.models import Word2Vec
 from scipy.linalg import orthogonal_procrustes
 
@@ -332,10 +331,12 @@ class CrossEpistleAnalyzer:
 
     def _train_model(self, texts: list[str]) -> Optional[Word2Vec]:
         """Train a Word2Vec model on the given texts."""
+        from ..corpus.loader import sent_tokenize, word_tokenize
+
         sentences = []
         for text in texts:
-            for sent in nltk.sent_tokenize(text):
-                tokens = nltk.word_tokenize(sent.lower())
+            for sent in sent_tokenize(text):
+                tokens = word_tokenize(sent)
                 if len(tokens) >= 3:
                     sentences.append(tokens)
 

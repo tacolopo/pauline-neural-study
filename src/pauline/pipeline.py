@@ -622,17 +622,18 @@ Examples:
         config.combinatorial.n_sentences = 50
         logger.info("Quick mode: reduced samples for testing")
 
-    # Ensure NLTK data is available
-    import nltk
-    for resource in ["punkt", "punkt_tab", "averaged_perceptron_tagger",
-                     "averaged_perceptron_tagger_eng"]:
-        try:
-            nltk.data.find(
-                f"tokenizers/{resource}" if "punkt" in resource
-                else f"taggers/{resource}"
-            )
-        except LookupError:
-            nltk.download(resource, quiet=True)
+    # Ensure NLTK data is available (only needed for English text)
+    if config.corpus.source != "text_files" or config.corpus.translation != "greek":
+        import nltk
+        for resource in ["punkt", "punkt_tab", "averaged_perceptron_tagger",
+                         "averaged_perceptron_tagger_eng"]:
+            try:
+                nltk.data.find(
+                    f"tokenizers/{resource}" if "punkt" in resource
+                    else f"taggers/{resource}"
+                )
+            except LookupError:
+                nltk.download(resource, quiet=True)
 
     # Run pipeline
     pipeline = Pipeline(config)

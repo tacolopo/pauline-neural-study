@@ -58,9 +58,7 @@ from numpy.typing import NDArray
 from scipy import stats
 from scipy.spatial.distance import cosine
 
-import nltk
-
-from ..corpus.loader import PaulineCorpus, Epistle, Pericope
+from ..corpus.loader import PaulineCorpus, Epistle, Pericope, word_tokenize, sent_tokenize
 
 logger = logging.getLogger(__name__)
 
@@ -585,7 +583,7 @@ class FractalAnalyzer:
         # --- Sentence-scale ---
         sent_matrix = np.zeros((v, v), dtype=np.float64)
         for _, sent_text in self.corpus.all_sentences:
-            tokens = set(nltk.word_tokenize(sent_text.lower()))
+            tokens = set(word_tokenize(sent_text))
             present = [vocab_idx[t] for t in tokens if t in vocab_idx]
             for i in range(len(present)):
                 for j in range(i + 1, len(present)):
@@ -606,7 +604,7 @@ class FractalAnalyzer:
             pericopes_found += len(units)
 
             for unit_text in units:
-                tokens = set(nltk.word_tokenize(unit_text.lower()))
+                tokens = set(word_tokenize(unit_text))
                 present = [vocab_idx[t] for t in tokens if t in vocab_idx]
                 for i in range(len(present)):
                     for j in range(i + 1, len(present)):

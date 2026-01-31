@@ -189,7 +189,7 @@ class EmbeddingTrainer:
         Returns:
             EmbeddingResult with mean embeddings and stability metrics.
         """
-        import nltk
+        from ..corpus.loader import word_tokenize, sent_tokenize
 
         n_samples = len(bootstrap_result.samples)
         logger.info(f"Training embeddings on {n_samples} bootstrap samples...")
@@ -197,10 +197,11 @@ class EmbeddingTrainer:
         # Phase 1: Train individual models and extract embeddings
         models: list[Word2Vec] = []
         for i, sample in enumerate(bootstrap_result.samples):
-            sentences = [
-                nltk.word_tokenize(text.lower())
-                for text in sample.texts
-            ]
+            # Each text unit may contain multiple sentences; tokenize each
+            sentences = []
+            for text in sample.texts:
+                for s in sent_tokenize(text):
+                    sentences.append(word_tokenize(s))
 
             # Filter out very short sentences
             sentences = [s for s in sentences if len(s) >= 3]

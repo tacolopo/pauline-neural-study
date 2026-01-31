@@ -72,8 +72,8 @@ class BootstrapSample:
 
     @property
     def words(self) -> list[str]:
-        import nltk
-        return nltk.word_tokenize(self.combined_text.lower())
+        from ..corpus.loader import word_tokenize
+        return word_tokenize(self.combined_text)
 
     @property
     def word_count(self) -> int:
@@ -121,8 +121,6 @@ class BootstrapSampler:
 
     def _prepare_units(self) -> None:
         """Pre-compute text units at each sampling level."""
-        import nltk
-
         # Epistle-level units
         self._epistle_units: list[str] = [
             ep.text for ep in self.corpus.epistles

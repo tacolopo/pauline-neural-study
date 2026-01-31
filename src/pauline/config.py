@@ -19,9 +19,9 @@ import yaml
 class CorpusConfig:
     """Corpus loading configuration."""
     data_dir: str = "data"
-    undisputed_only: bool = True
-    source: str = "api"  # "api", "json", "text_files"
-    translation: str = "web"
+    undisputed_only: bool = False
+    source: str = "text_files"  # "text_files" (local Greek), "api", "json"
+    translation: str = "greek"
     cache_file: str = "data/pauline_corpus.json"
 
 
@@ -104,27 +104,44 @@ class AnalysisConfig:
     """Analysis and output configuration."""
     output_dir: str = "output"
     target_words: list[str] = field(default_factory=lambda: [
-        # Core theological terms (English equivalents for WEB text)
-        "justification", "justified", "justify", "righteous", "righteousness",
-        "faith", "believe", "belief",
-        "law", "commandment", "commandments",
-        "grace", "mercy", "gift",
-        "sin", "sins", "sinned", "sinner",
-        "spirit", "flesh", "body",
-        "christ", "jesus", "lord", "god",
-        "love", "hope", "peace",
-        "death", "life", "resurrection",
-        "cross", "blood", "sacrifice",
-        "church", "body", "members",
-        "salvation", "saved", "save",
-        "gospel", "preach", "preaching",
-        "circumcision", "uncircumcision",
-        "gentile", "gentiles", "jew", "jews",
-        "abraham", "moses",
-        "covenant", "promise", "promises",
-        "glory", "power", "wisdom",
-        "freedom", "slave", "bondage",
-        "baptism", "baptized",
+        # Core theological terms (Koine Greek)
+        # Righteousness (δικαιοσύνη)
+        "δικαιοσύνη", "δικαιοσύνην", "δικαιοσύνης", "δίκαιος",
+        # Faith (πίστις)
+        "πίστις", "πίστεως", "πίστιν",
+        # Law (νόμος)
+        "νόμος", "νόμου", "νόμον", "νόμῳ",
+        # Grace (χάρις)
+        "χάρις", "χάριτι", "χάριτος", "χάρισμα",
+        # Sin (ἁμαρτία)
+        "ἁμαρτία", "ἁμαρτίας", "ἁμαρτίαν",
+        # Spirit/Flesh
+        "πνεῦμα", "πνεύματος", "σάρξ", "σαρκός", "σῶμα", "σώματος",
+        # Christological
+        "χριστοῦ", "χριστῷ", "χριστόν",
+        "ἰησοῦ", "κύριος", "κυρίου", "θεός", "θεοῦ", "θεῷ",
+        # Virtues
+        "ἀγάπη", "ἀγάπην", "ἐλπίς", "εἰρήνη",
+        # Death/Life
+        "θάνατος", "θανάτου", "ζωή", "ζωῆς", "ἀνάστασις",
+        # Atonement
+        "σταυρός", "σταυροῦ", "αἷμα",
+        # Ecclesiology
+        "ἐκκλησία", "ἐκκλησίας",
+        # Soteriology
+        "σωτηρία", "εὐαγγέλιον", "εὐαγγελίου",
+        # Identity
+        "περιτομή", "ἀκροβυστία", "ἔθνη", "ἐθνῶν",
+        # Patriarchs
+        "ἀβραάμ",
+        # Covenant
+        "διαθήκη", "ἐπαγγελία", "ἐπαγγελίας",
+        # Divine attributes
+        "δόξα", "δόξης", "δύναμις", "σοφία",
+        # Freedom/Slavery
+        "ἐλευθερία", "δοῦλος",
+        # Baptism
+        "βάπτισμα",
     ])
     generate_plots: bool = True
     save_embeddings: bool = True

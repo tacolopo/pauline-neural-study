@@ -6,13 +6,16 @@ Generates synthetic Pauline text by recombining Paul's own words
 within his own grammatical structures.
 
 Approach:
-    1. Parse all Pauline sentences into POS-tag templates
-    2. For each grammatical slot (NOUN, VERB, ADJ, etc.), collect
-       the set of words Paul actually used in that slot
-    3. Generate new sentences by filling templates with Paul's words
-       drawn from the correct grammatical slots
-    4. Apply co-occurrence constraints: only combine words that
-       Paul used in similar contexts
+    For English text:
+        1. Parse all Pauline sentences into POS-tag templates
+        2. For each grammatical slot, collect Paul's words for that POS
+        3. Generate new sentences by filling templates with Paul's words
+
+    For Greek text:
+        1. Parse sentences into positional templates based on word position
+           within the sentence (since NLTK POS tagging does not support Greek)
+        2. For each position class, collect words Paul used at similar positions
+        3. Apply co-occurrence constraints from bigram frequencies
 
 Constraints (Preserving Pauline Integrity):
     - Every word in generated text exists in Paul's vocabulary
@@ -34,10 +37,8 @@ from itertools import product
 from typing import Optional
 
 import numpy as np
-import nltk
-from nltk import pos_tag, word_tokenize
 
-from ..corpus.loader import PaulineCorpus
+from ..corpus.loader import PaulineCorpus, word_tokenize as corpus_word_tokenize, _is_greek
 
 logger = logging.getLogger(__name__)
 
@@ -96,28 +97,45 @@ class CombinatorialRecombiner:
 
     def prepare(self) -> None:
         """
-        Parse corpus to extract templates and build POS vocabulary.
+        Parse corpus to extract templates and build slot vocabulary.
+
+        For English: uses POS-tag based templates.
+        For Greek: uses position-class based templates (beginning/middle/end
+        of sentence) since NLTK POS tagging does not support Koine Greek.
 
         This must be called before generating sentences.
         """
         logger.info("Preparing combinatorial recombiner...")
 
-        # Ensure NLTK resources are available
+        # Detect if corpus is Greek
+        sample_text = self.corpus.epistles[0].text[:200] if self.corpus.epistles else ""
+        self._is_greek = _is_greek(sample_text)
+
+        if self._is_greek:
+            self._prepare_greek()
+        else:
+            self._prepare_english()
+
+        self._prepared = True
+
+    def _prepare_english(self) -> None:
+        """Prepare templates using NLTK POS tagging (English only)."""
+        import nltk
+        from nltk import pos_tag as nltk_pos_tag, word_tokenize as nltk_word_tokenize
+
         for resource in ["punkt", "punkt_tab", "averaged_perceptron_tagger", "averaged_perceptron_tagger_eng"]:
             try:
                 nltk.data.find(f"tokenizers/{resource}" if "punkt" in resource else f"taggers/{resource}")
             except LookupError:
                 nltk.download(resource, quiet=True)
 
-        all_words_in_context: dict[str, set[str]] = defaultdict(set)
-
         for ep in self.corpus.epistles:
-            for _, sent_text in [(ep.name, s) for s in ep.sentences]:
-                tokens = word_tokenize(sent_text.lower())
+            for sent_text in ep.sentences:
+                tokens = nltk_word_tokenize(sent_text.lower())
                 if len(tokens) < 3:
                     continue
 
-                tagged = pos_tag(tokens)
+                tagged = nltk_pos_tag(tokens)
                 tags = tuple(tag for _, tag in tagged)
 
                 template = SyntacticTemplate(
@@ -126,16 +144,13 @@ class CombinatorialRecombiner:
                     source_epistle=ep.name,
                 )
 
-                # Record which words Paul used at each position
                 for i, (word, tag) in enumerate(tagged):
                     if word.isalpha():
                         template.word_slots.setdefault(i, []).append(word)
                         self._pos_vocabulary[tag].append(word)
-                        all_words_in_context[tag].add(word)
 
                 self._templates.append(template)
 
-                # Build bigram frequencies for co-occurrence constraints
                 for i in range(len(tokens) - 1):
                     if tokens[i].isalpha() and tokens[i + 1].isalpha():
                         self._bigram_freqs[(tokens[i], tokens[i + 1])] += 1
@@ -143,7 +158,62 @@ class CombinatorialRecombiner:
                 for i in range(len(tags) - 1):
                     self._pos_bigram_freqs[(tags[i], tags[i + 1])] += 1
 
-        # Deduplicate POS vocabulary
+        for tag in self._pos_vocabulary:
+            self._pos_vocabulary[tag] = list(set(self._pos_vocabulary[tag]))
+
+    def _prepare_greek(self) -> None:
+        """
+        Prepare templates for Greek text using position-based slots.
+
+        Since POS tagging is unavailable for Koine Greek without
+        specialized models, we use a position-based approach:
+            - Classify each word position as 'BEGIN', 'MID', or 'END'
+              relative to the sentence
+            - This captures the broad syntactic tendency of Greek
+              (verbs often sentence-initial, particles early, etc.)
+            - Additionally group words by their relative position
+              quartile (Q1, Q2, Q3, Q4) within the sentence
+        """
+        for ep in self.corpus.epistles:
+            for sent_text in ep.sentences:
+                tokens = corpus_word_tokenize(sent_text)
+                if len(tokens) < 3:
+                    continue
+
+                # Create position-based tags
+                n = len(tokens)
+                tags = []
+                for i in range(n):
+                    quartile = int(4 * i / n)  # 0, 1, 2, 3
+                    tag = f"Q{quartile}"
+                    tags.append(tag)
+
+                tags_tuple = tuple(tags)
+
+                template = SyntacticTemplate(
+                    tags=tags_tuple,
+                    original_sentence=sent_text,
+                    source_epistle=ep.name,
+                )
+
+                for i, word in enumerate(tokens):
+                    # Greek words won't pass .isalpha() check for ASCII,
+                    # so check if they contain any letter characters
+                    if any(c.isalpha() for c in word):
+                        template.word_slots.setdefault(i, []).append(word)
+                        self._pos_vocabulary[tags[i]].append(word)
+
+                self._templates.append(template)
+
+                # Build bigram frequencies
+                for i in range(len(tokens) - 1):
+                    w1, w2 = tokens[i], tokens[i + 1]
+                    if any(c.isalpha() for c in w1) and any(c.isalpha() for c in w2):
+                        self._bigram_freqs[(w1, w2)] += 1
+
+                for i in range(len(tags) - 1):
+                    self._pos_bigram_freqs[(tags[i], tags[i + 1])] += 1
+
         for tag in self._pos_vocabulary:
             self._pos_vocabulary[tag] = list(set(self._pos_vocabulary[tag]))
 
@@ -206,7 +276,7 @@ class CombinatorialRecombiner:
                     vocab_used.add(word)
                 else:
                     # Use original word if no candidates for this POS
-                    original_tokens = word_tokenize(template.original_sentence.lower())
+                    original_tokens = corpus_word_tokenize(template.original_sentence)
                     if i < len(original_tokens):
                         sentence_words.append(original_tokens[i])
 
@@ -273,7 +343,7 @@ class CombinatorialRecombiner:
                 for i, tag in enumerate(template.tags):
                     candidates = self._pos_vocabulary.get(tag, [])
                     if not candidates:
-                        original_tokens = word_tokenize(template.original_sentence.lower())
+                        original_tokens = corpus_word_tokenize(template.original_sentence)
                         if i < len(original_tokens):
                             sentence_words.append(original_tokens[i])
                         continue
@@ -341,12 +411,17 @@ class CombinatorialRecombiner:
         Generate sentences that incorporate specific seed words.
 
         Useful for exploring how Paul might have combined specific
-        theological terms. Only uses templates whose POS structure
+        theological terms. Only uses templates whose tag structure
         can accommodate the seed words.
+
+        For English: matches seed words by POS tag.
+        For Greek: matches seed words by the position-quartile tags
+        where the word has been observed in the corpus.
 
         Args:
             seed_words: Words to include in generated sentences.
                        Must be in Paul's vocabulary.
+            n_sentences: Number of sentences to generate.
             min_length: Minimum sentence length.
             max_length: Maximum sentence length.
 
@@ -361,32 +436,51 @@ class CombinatorialRecombiner:
         invalid = [w for w in seed_words if w.lower() not in paul_vocab]
         if invalid:
             logger.warning(f"Words not in Paul's vocabulary (skipping): {invalid}")
-            seed_words = [w for w in seed_words if w.lower() not in paul_vocab]
+            seed_words = [w for w in seed_words if w.lower() in paul_vocab]
 
         if not seed_words:
             raise ValueError("No valid seed words remain")
 
-        # Find POS tags for seed words
-        seed_tags = {word: pos_tag([word.lower()])[0][1] for word in seed_words}
+        # Find tags for seed words based on language
+        seed_tags: dict[str, set[str]] = {}
+        if self._is_greek:
+            # For Greek: find which position-quartile tags each word appears under
+            for word in seed_words:
+                word_lower = word.lower()
+                tags_for_word: set[str] = set()
+                for tag, words in self._pos_vocabulary.items():
+                    if word_lower in words:
+                        tags_for_word.add(tag)
+                seed_tags[word] = tags_for_word if tags_for_word else {"Q1", "Q2"}
+        else:
+            # For English: use NLTK POS tagging
+            import nltk
+            from nltk import pos_tag as nltk_pos_tag
+            for word in seed_words:
+                tag = nltk_pos_tag([word.lower()])[0][1]
+                seed_tags[word] = {tag}
 
-        # Find templates that have slots matching seed word POS tags
+        # Find templates that have slots matching at least one tag per seed word
         valid_templates = []
         for t in self._templates:
             if not (min_length <= t.length <= max_length):
                 continue
             template_tags = set(t.tags)
-            if all(tag in template_tags for tag in seed_tags.values()):
+            if all(
+                seed_word_tags & template_tags
+                for seed_word_tags in seed_tags.values()
+            ):
                 valid_templates.append(t)
 
         if not valid_templates:
-            logger.warning("No templates match all seed word POS tags, using relaxed matching")
+            logger.warning("No templates match all seed word tags, using relaxed matching")
             valid_templates = [
                 t for t in self._templates
                 if min_length <= t.length <= max_length
             ]
 
         generated = []
-        vocab_used: set[str] = set(seed_words)
+        vocab_used: set[str] = set(w.lower() for w in seed_words)
 
         for _ in range(n_sentences):
             template = valid_templates[self.rng.integers(0, len(valid_templates))]
@@ -397,7 +491,7 @@ class CombinatorialRecombiner:
                 # Try to place unplaced seed words
                 placed = False
                 for sw in seed_words:
-                    if not seed_placed[sw] and seed_tags.get(sw) == tag:
+                    if not seed_placed[sw] and tag in seed_tags.get(sw, set()):
                         sentence_words.append(sw.lower())
                         seed_placed[sw] = True
                         placed = True
@@ -410,7 +504,7 @@ class CombinatorialRecombiner:
                         sentence_words.append(word)
                         vocab_used.add(word)
                     else:
-                        original_tokens = word_tokenize(template.original_sentence.lower())
+                        original_tokens = corpus_word_tokenize(template.original_sentence)
                         if i < len(original_tokens):
                             sentence_words.append(original_tokens[i])
 
@@ -423,7 +517,7 @@ class CombinatorialRecombiner:
             vocabulary_used=vocab_used,
             generation_method="seed_word_constrained",
             constraints_applied=[
-                "pos_tag_matching",
+                "tag_matching" + (" (position-quartile)" if self._is_greek else " (POS)"),
                 "pauline_vocabulary_only",
                 f"seed_words: {seed_words}",
             ],

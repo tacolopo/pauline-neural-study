@@ -197,8 +197,6 @@ class HierarchicalBayesianModel:
 
     def _prepare_data(self) -> None:
         """Convert corpus to document-word format for Gibbs sampling."""
-        import nltk
-
         # Build vocabulary from corpus
         word_counts: Counter = Counter()
         for ep in self.corpus.epistles:

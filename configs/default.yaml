@@ -2,7 +2,7 @@
 # ==============================================
 #
 # This config runs the core phases of the study:
-#   1. Corpus fetching (World English Bible, public domain)
+#   1. Corpus loading (Koine Greek text files)
 #   2. Multi-level bootstrap resampling
 #   3. Word embedding training with stability analysis
 #   4. Cross-epistle leave-one-out analysis
@@ -15,9 +15,9 @@
 
 corpus:
   data_dir: "data"
-  undisputed_only: true      # Only the 7 undisputed Pauline epistles
-  source: "api"              # "api" (bible-api.com), "json", or "text_files"
-  translation: "web"         # World English Bible (public domain)
+  undisputed_only: false     # Include all 14 Pauline epistles (+ Hebrews)
+  source: "text_files"       # "text_files" (local Greek), "api" (bible-api.com), or "json"
+  translation: "greek"       # Koine Greek source texts
   cache_file: "data/pauline_corpus.json"
 
 bootstrap:
@@ -78,85 +78,114 @@ analysis:
   generate_plots: true
   save_embeddings: true
   target_words:
-    # Justification / Righteousness semantic field
-    - "justification"
-    - "justified"
-    - "justify"
-    - "righteous"
-    - "righteousness"
-    # Faith semantic field
-    - "faith"
-    - "believe"
-    - "belief"
-    # Law semantic field
-    - "law"
-    - "commandment"
-    - "commandments"
-    # Grace semantic field
-    - "grace"
-    - "mercy"
-    - "gift"
-    # Sin semantic field
-    - "sin"
-    - "sins"
-    - "sinned"
-    - "sinner"
+    # Justification / Righteousness (δικαιοσύνη semantic field)
+    - "δικαιοσύνη"       # righteousness (nom)
+    - "δικαιοσύνην"      # righteousness (acc)
+    - "δικαιοσύνης"      # righteousness (gen)
+    - "δίκαιος"          # righteous
+    - "δικαιωθέντες"     # having been justified
+    - "δικαιοῦται"       # is justified
+    # Faith (πίστις semantic field)
+    - "πίστις"           # faith (nom)
+    - "πίστεως"          # faith (gen)
+    - "πίστιν"           # faith (acc)
+    - "πιστεύω"          # I believe
+    - "πιστεύοντες"      # believing (ptc)
+    # Law (νόμος semantic field)
+    - "νόμος"            # law (nom)
+    - "νόμου"            # law (gen)
+    - "νόμον"            # law (acc)
+    - "νόμῳ"             # law (dat)
+    - "ἐντολή"           # commandment
+    # Grace (χάρις semantic field)
+    - "χάρις"            # grace (nom)
+    - "χάριτι"           # grace (dat)
+    - "χάριτος"          # grace (gen)
+    - "ἔλεος"            # mercy
+    - "χάρισμα"          # gift/charism
+    # Sin (ἁμαρτία semantic field)
+    - "ἁμαρτία"          # sin (nom)
+    - "ἁμαρτίας"         # sin (gen)
+    - "ἁμαρτίαν"         # sin (acc)
+    - "ἁμαρτωλός"        # sinner
     # Spirit/Flesh dichotomy
-    - "spirit"
-    - "flesh"
-    - "body"
+    - "πνεῦμα"           # spirit (nom/acc)
+    - "πνεύματος"        # spirit (gen)
+    - "πνεύματι"         # spirit (dat)
+    - "σάρξ"             # flesh (nom)
+    - "σαρκός"           # flesh (gen)
+    - "σαρκί"            # flesh (dat)
+    - "σῶμα"             # body (nom/acc)
+    - "σώματος"          # body (gen)
     # Christological terms
-    - "christ"
-    - "jesus"
-    - "lord"
-    - "god"
+    - "χριστοῦ"          # Christ (gen) — most frequent form
+    - "χριστῷ"           # Christ (dat)
+    - "χριστόν"          # Christ (acc)
+    - "ἰησοῦ"            # Jesus (gen/dat)
+    - "ἰησοῦν"           # Jesus (acc)
+    - "κύριος"           # Lord (nom)
+    - "κυρίου"           # Lord (gen)
+    - "κυρίῳ"            # Lord (dat)
+    - "θεός"             # God (nom)
+    - "θεοῦ"             # God (gen)
+    - "θεῷ"              # God (dat)
     # Virtue terms
-    - "love"
-    - "hope"
-    - "peace"
-    # Death/Life
-    - "death"
-    - "life"
-    - "resurrection"
+    - "ἀγάπη"            # love (nom)
+    - "ἀγάπην"           # love (acc)
+    - "ἀγάπης"           # love (gen)
+    - "ἐλπίς"            # hope (nom)
+    - "ἐλπίδα"           # hope (acc)
+    - "εἰρήνη"           # peace (nom)
+    - "εἰρήνην"          # peace (acc)
+    # Death/Life/Resurrection
+    - "θάνατος"          # death (nom)
+    - "θανάτου"          # death (gen)
+    - "ζωή"              # life (nom)
+    - "ζωῆς"             # life (gen)
+    - "ἀνάστασις"        # resurrection (nom)
+    - "ἀναστάσεως"       # resurrection (gen)
     # Atonement
-    - "cross"
-    - "blood"
-    - "sacrifice"
+    - "σταυρός"          # cross (nom)
+    - "σταυροῦ"          # cross (gen)
+    - "αἷμα"             # blood (nom/acc)
+    - "αἵματος"          # blood (gen)
     # Ecclesiology
-    - "church"
-    - "members"
+    - "ἐκκλησία"         # church (nom)
+    - "ἐκκλησίας"        # church (gen)
+    - "ἐκκλησίᾳ"         # church (dat)
     # Soteriology
-    - "salvation"
-    - "saved"
-    - "save"
-    - "gospel"
-    - "preach"
-    - "preaching"
+    - "σωτηρία"          # salvation (nom)
+    - "σωτηρίας"         # salvation (gen)
+    - "εὐαγγέλιον"       # gospel (nom/acc)
+    - "εὐαγγελίου"       # gospel (gen)
     # Identity markers
-    - "circumcision"
-    - "uncircumcision"
-    - "gentile"
-    - "gentiles"
-    - "jew"
-    - "jews"
+    - "περιτομή"         # circumcision
+    - "ἀκροβυστία"       # uncircumcision
+    - "ἔθνη"             # gentiles/nations (nom/acc pl)
+    - "ἐθνῶν"            # gentiles (gen pl)
     # Patriarchs
-    - "abraham"
-    - "moses"
-    # Covenant
-    - "covenant"
-    - "promise"
-    - "promises"
+    - "ἀβραάμ"           # Abraham (indecl)
+    - "μωϋσῆς"           # Moses
+    # Covenant/Promise
+    - "διαθήκη"          # covenant (nom)
+    - "διαθήκης"         # covenant (gen)
+    - "ἐπαγγελία"        # promise (nom)
+    - "ἐπαγγελίας"       # promise (gen)
     # Divine attributes
-    - "glory"
-    - "power"
-    - "wisdom"
-    # Freedom
-    - "freedom"
-    - "slave"
-    - "bondage"
-    # Sacraments
-    - "baptism"
-    - "baptized"
+    - "δόξα"             # glory (nom)
+    - "δόξης"            # glory (gen)
+    - "δύναμις"          # power (nom)
+    - "δυνάμεως"         # power (gen)
+    - "σοφία"            # wisdom (nom)
+    - "σοφίας"           # wisdom (gen)
+    # Freedom/Slavery
+    - "ἐλευθερία"        # freedom (nom)
+    - "ἐλευθερίας"       # freedom (gen)
+    - "δοῦλος"           # slave (nom)
+    - "δούλου"           # slave (gen)
+    # Baptism
+    - "βάπτισμα"         # baptism (nom/acc)
+    - "ἐβαπτίσθητε"     # you were baptized
 
 # Phases to execute (in order)
 phases:

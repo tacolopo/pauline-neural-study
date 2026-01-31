@@ -69,9 +69,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader
 
-import nltk
-
-from ..corpus.loader import PaulineCorpus
+from ..corpus.loader import PaulineCorpus, word_tokenize
 
 logger = logging.getLogger(__name__)
 
@@ -184,7 +182,7 @@ class PaulineBoWDataset(Dataset):
 
     def _sentence_to_bow(self, sentence: str) -> torch.Tensor:
         """Convert a sentence to a normalized BoW vector."""
-        tokens = nltk.word_tokenize(sentence.lower())
+        tokens = word_tokenize(sentence)
         vec = torch.zeros(self.vocab_size, dtype=torch.float32)
         for t in tokens:
             if t in self.word_to_idx:

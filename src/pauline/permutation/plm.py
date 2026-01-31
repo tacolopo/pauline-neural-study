@@ -63,9 +63,7 @@ from numpy.typing import NDArray
 from scipy.sparse import csr_matrix
 from scipy.sparse.linalg import svds
 
-import nltk
-
-from ..corpus.loader import PaulineCorpus, Pericope
+from ..corpus.loader import PaulineCorpus, Pericope, word_tokenize
 
 logger = logging.getLogger(__name__)
 
@@ -335,7 +333,7 @@ class PermutationLM:
         tokenized: list[list[str]] = []
 
         for sent in all_sentences:
-            tokens = nltk.word_tokenize(sent.lower())
+            tokens = word_tokenize(sent)
             tokens = [t for t in tokens if t.isalpha()]
             tokenized.append(tokens)
             unique_tokens = set(tokens)
@@ -405,7 +403,7 @@ class PermutationLM:
             self.prepare_embeddings()
 
         vocab_idx = {w: i for i, w in enumerate(self._vocab_list)}
-        tokens = nltk.word_tokenize(sentence.lower())
+        tokens = word_tokenize(sentence)
         tokens = [t for t in tokens if t.isalpha() and t in vocab_idx]
 
         v = len(self._vocab_list)

@@ -10,6 +10,15 @@ this study are language-agnostic — they operate on token distributions
 regardless of source language. Greek is preferred for scholarly precision;
 English enables rapid prototyping and validation.
 
+Greek Tokenization:
+    Koine Greek uses distinct punctuation conventions:
+        . (period)         → sentence end
+        · (ano teleia)     → clause separator (like English semicolon/colon)
+        ; (erotimatiko)    → question mark
+        , (comma)          → clause separator
+    Sentence boundaries are detected at . and ; marks.
+    Word tokenization splits on whitespace and strips punctuation.
+
 The 7 undisputed Pauline epistles:
     - Romans
     - 1 Corinthians
@@ -26,6 +35,9 @@ The 6 disputed epistles (included optionally):
     - 1 Timothy
     - 2 Timothy
     - Titus
+
+Additionally, Hebrews is included in the corpus data (traditionally
+attributed to Paul, though widely disputed).
 """
 
 from __future__ import annotations
@@ -33,11 +45,10 @@ from __future__ import annotations
 import json
 import re
 import logging
+import unicodedata
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
-
-import nltk
 
 logger = logging.getLogger(__name__)
 
@@ -56,11 +67,95 @@ PAULINE_EPISTLES = {
     "1 Timothy": ("1Tim", False),
     "2 Timothy": ("2Tim", False),
     "Titus": ("Tit", False),
+    "Hebrews": ("Heb", False),
 }
 
 UNDISPUTED_EPISTLES = [name for name, (_, und) in PAULINE_EPISTLES.items() if und]
 ALL_EPISTLES = list(PAULINE_EPISTLES.keys())
 
+
+# ---------------------------------------------------------------------------
+# Greek tokenization utilities
+# ---------------------------------------------------------------------------
+
+def _is_greek(text: str) -> bool:
+    """Detect if text is primarily Greek by checking character scripts."""
+    greek_chars = sum(1 for ch in text if unicodedata.category(ch).startswith("L")
+                      and "\u0370" <= ch <= "\u03FF" or "\u1F00" <= ch <= "\u1FFF")
+    latin_chars = sum(1 for ch in text if unicodedata.category(ch).startswith("L")
+                      and "A" <= ch <= "z")
+    return greek_chars > latin_chars
+
+
+def greek_sent_tokenize(text: str) -> list[str]:
+    """
+    Split Greek text into sentences.
+
+    Sentence boundaries in Koine Greek:
+        . (U+002E, period) — full stop
+        ; (U+003B, semicolon) — Greek question mark (erotimatiko)
+
+    The ano teleia (·, U+00B7 or U+0387) is a clause separator
+    (similar to English semicolon) but NOT a sentence boundary.
+    """
+    # Split on sentence-ending punctuation followed by space or end-of-string.
+    # Preserve the punctuation with the preceding sentence.
+    parts = re.split(r'(?<=[.;])\s+', text.strip())
+    sentences = [s.strip() for s in parts if s.strip()]
+    return sentences
+
+
+def greek_word_tokenize(text: str) -> list[str]:
+    """
+    Tokenize Greek text into words.
+
+    Splits on whitespace and strips punctuation characters.
+    Preserves Greek diacriticals and breathing marks.
+    Lowercasing is not applied here since Greek has meaningful case
+    (though the caller may choose to normalize).
+    """
+    # Split on whitespace
+    raw_tokens = text.split()
+    words = []
+    for token in raw_tokens:
+        # Strip leading/trailing punctuation (.,;·—()«»)
+        cleaned = token.strip(".,;·\u0387—–-()«»\"'[]{}!?:''""")
+        if cleaned:
+            words.append(cleaned)
+    return words
+
+
+def normalize_greek(word: str) -> str:
+    """
+    Normalize a Greek word for comparison purposes.
+
+    Applies Unicode NFC normalization and lowercases.
+    Greek lowercasing handles final sigma (ς vs σ) correctly.
+    """
+    return unicodedata.normalize("NFC", word.lower())
+
+
+def sent_tokenize(text: str) -> list[str]:
+    """Language-aware sentence tokenizer. Uses Greek or NLTK English."""
+    if _is_greek(text):
+        return greek_sent_tokenize(text)
+    else:
+        import nltk
+        return nltk.sent_tokenize(text)
+
+
+def word_tokenize(text: str) -> list[str]:
+    """Language-aware word tokenizer. Uses Greek or NLTK English."""
+    if _is_greek(text):
+        return [normalize_greek(w) for w in greek_word_tokenize(text)]
+    else:
+        import nltk
+        return nltk.word_tokenize(text.lower())
+
+
+# ---------------------------------------------------------------------------
+# Data classes
+# ---------------------------------------------------------------------------
 
 @dataclass
 class Verse:
@@ -95,11 +190,11 @@ class Pericope:
 
     @property
     def sentences(self) -> list[str]:
-        return nltk.sent_tokenize(self.text)
+        return sent_tokenize(self.text)
 
     @property
     def words(self) -> list[str]:
-        return nltk.word_tokenize(self.text.lower())
+        return word_tokenize(self.text)
 
 
 @dataclass
@@ -123,11 +218,11 @@ class Epistle:
 
     @property
     def sentences(self) -> list[str]:
-        return nltk.sent_tokenize(self.text)
+        return sent_tokenize(self.text)
 
     @property
     def words(self) -> list[str]:
-        return nltk.word_tokenize(self.text.lower())
+        return word_tokenize(self.text)
 
     @property
     def chapters(self) -> dict[int, list[Verse]]:
@@ -182,8 +277,8 @@ class PaulineCorpus:
 
         for ep in self.epistles:
             self._by_name[ep.name] = ep
-            for sent in ep.sentences:
-                self._all_sentences.append((ep.name, sent))
+            for s in ep.sentences:
+                self._all_sentences.append((ep.name, s))
             self._all_words.extend(ep.words)
             self._vocabulary.update(ep.vocabulary)
 
@@ -223,11 +318,19 @@ class PaulineCorpus:
     def total_sentences(self) -> int:
         return len(self._all_sentences)
 
+    @property
+    def is_greek(self) -> bool:
+        """Check if corpus is in Greek."""
+        if self.epistles:
+            sample = self.epistles[0].text[:200]
+            return _is_greek(sample)
+        return False
+
     def sentences_by_epistle(self) -> dict[str, list[str]]:
         """Group sentences by their source epistle."""
         result: dict[str, list[str]] = {}
-        for book, sent in self._all_sentences:
-            result.setdefault(book, []).append(sent)
+        for book, s in self._all_sentences:
+            result.setdefault(book, []).append(s)
         return result
 
     def word_frequency(self) -> dict[str, int]:
@@ -246,6 +349,7 @@ class PaulineCorpus:
             "vocabulary_size": self.vocabulary_size,
             "total_sentences": self.total_sentences,
             "undisputed_only": self.undisputed_only,
+            "is_greek": self.is_greek,
             "words_per_epistle": {
                 e.name: e.word_count for e in self.epistles
             },
@@ -314,13 +418,19 @@ class PaulineCorpus:
         Load corpus from plain text files.
 
         Each file should be named after the epistle (e.g., 'Romans.txt').
-        Text is split into sentences using NLTK's sentence tokenizer.
-        Verse boundaries are detected by patterns like '1:1' at line starts.
+        Supports both Greek and English text. Language is auto-detected
+        and the appropriate tokenizer is used.
+
+        For raw Greek text (no verse annotations), the entire text is
+        split into sentences using Greek punctuation rules, and each
+        sentence is stored as a pseudo-verse.
         """
         directory = Path(directory)
         epistles = []
 
-        for ep_name in (UNDISPUTED_EPISTLES if undisputed_only else ALL_EPISTLES):
+        target_list = UNDISPUTED_EPISTLES if undisputed_only else ALL_EPISTLES
+
+        for ep_name in target_list:
             # Try multiple filename patterns
             candidates = [
                 directory / f"{ep_name}.txt",
@@ -340,7 +450,14 @@ class PaulineCorpus:
 
             text = filepath.read_text(encoding="utf-8")
             verses = _parse_text_to_verses(ep_name, text)
-            epistles.append(Epistle(name=ep_name, verses=verses))
+            if verses:
+                epistles.append(Epistle(name=ep_name, verses=verses))
+                logger.info(
+                    f"  Loaded {ep_name}: {len(verses)} units, "
+                    f"{sum(len(word_tokenize(v.text)) for v in verses)} words"
+                )
+            else:
+                logger.warning(f"  No content parsed for {ep_name}")
 
         return cls(epistles=epistles, undisputed_only=undisputed_only)
 
@@ -349,18 +466,23 @@ def _parse_text_to_verses(book: str, text: str) -> list[Verse]:
     """
     Parse raw text into verse objects.
 
-    Supports two formats:
+    Supports three formats:
     1. Verse-annotated: lines starting with 'chapter:verse' pattern
-    2. Plain text: entire text treated as chapter 1, verse 1
+    2. Raw Greek text: split into sentences on Greek punctuation (. ;)
+    3. Raw English text: split into sentences via NLTK
     """
-    verses = []
-    verse_pattern = re.compile(r"^(\d+):(\d+)\s+(.*)")
+    text = text.strip()
+    if not text:
+        return []
 
-    for line in text.strip().split("\n"):
+    verses: list[Verse] = []
+
+    # Check for verse annotations first
+    verse_pattern = re.compile(r"^(\d+):(\d+)\s+(.*)")
+    for line in text.split("\n"):
         line = line.strip()
         if not line:
             continue
-
         match = verse_pattern.match(line)
         if match:
             chapter, verse_num, verse_text = match.groups()
@@ -371,10 +493,14 @@ def _parse_text_to_verses(book: str, text: str) -> list[Verse]:
                 text=verse_text.strip(),
             ))
 
-    # If no verse annotations found, treat as a single block
-    if not verses:
-        sentences = nltk.sent_tokenize(text)
-        for i, sent in enumerate(sentences, 1):
-            verses.append(Verse(book=book, chapter=1, verse=i, text=sent))
+    if verses:
+        return verses
+
+    # No verse annotations — split into sentences as pseudo-verses
+    sentences = sent_tokenize(text)
+    for i, s in enumerate(sentences, 1):
+        s = s.strip()
+        if s:
+            verses.append(Verse(book=book, chapter=1, verse=i, text=s))
 
     return verses
