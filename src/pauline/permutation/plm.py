@@ -681,9 +681,16 @@ class PermutationLM:
     # Internal helpers
     # ------------------------------------------------------------------
 
-    def _collect_pericopes(self) -> None:
+    def _collect_pericopes(self, chunk_size: int = 8) -> None:
         """Collect all pericopes from the corpus, falling back to
-        chapters as pseudo-pericopes if no pericopes are defined."""
+        chapters as pseudo-pericopes if no pericopes are defined.
+
+        For raw text (e.g., Greek without verse annotations), all
+        sentences end up in a single chapter. In that case, the chapter
+        is automatically chunked into groups of ``chunk_size`` verses
+        to create appropriately sized pseudo-pericopes for permutation
+        analysis.
+        """
         if self._pericopes:
             return
 
@@ -693,11 +700,24 @@ class PermutationLM:
             else:
                 # Create pseudo-pericopes from chapters
                 for ch_num, verses in ep.chapters.items():
-                    pseudo = Pericope(
-                        book=ep.name,
-                        label=f"Chapter {ch_num}",
-                        verses=verses,
-                    )
-                    self._pericopes.append(pseudo)
+                    if len(verses) <= chunk_size * 2:
+                        # Small enough to use as a single unit
+                        pseudo = Pericope(
+                            book=ep.name,
+                            label=f"Chapter {ch_num}",
+                            verses=verses,
+                        )
+                        self._pericopes.append(pseudo)
+                    else:
+                        # Chunk large chapters into smaller units
+                        for i in range(0, len(verses), chunk_size):
+                            chunk = verses[i : i + chunk_size]
+                            if len(chunk) >= 3:  # need at least 3 for permutations
+                                pseudo = Pericope(
+                                    book=ep.name,
+                                    label=f"Ch{ch_num}:{i+1}-{i+len(chunk)}",
+                                    verses=chunk,
+                                )
+                                self._pericopes.append(pseudo)
 
-        logger.info(f"Collected {len(self._pericopes)} pericopes/chapters")
+        logger.info(f"Collected {len(self._pericopes)} pericopes/chunks")

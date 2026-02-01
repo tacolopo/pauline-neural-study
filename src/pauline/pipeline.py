@@ -349,10 +349,15 @@ class Pipeline:
         result = analyzer.analyze()
 
         results_summary = {
-            "hurst_exponent": result.hurst_exponent,
-            "dfa_exponent": result.dfa_exponent,
-            "is_self_similar": result.is_self_similar,
-            "per_epistle": result.per_epistle_hurst,
+            "hurst_exponent": result.hurst.H,
+            "hurst_r_squared": result.hurst.r_squared,
+            "dfa_exponent": result.dfa.alpha,
+            "dfa_r_squared": result.dfa.r_squared,
+            "overall_fractal_score": result.overall_fractal_score,
+            "per_epistle": {
+                name: {"H": hr.H, "r_squared": hr.r_squared}
+                for name, hr in result.epistle_hurst.items()
+            },
         }
 
         with open(self.output_dir / "fractal_results.json", "w") as f:
