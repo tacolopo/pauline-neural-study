@@ -344,13 +344,7 @@ class Pipeline:
             logger.warning("Fractal analyzer not available, skipping")
             return {"status": "skipped", "reason": "module not available"}
 
-        cfg = self.config.fractal
-        analyzer = FractalAnalyzer(
-            corpus=self.corpus,
-            min_window=cfg.min_window,
-            max_window=cfg.max_window,
-            n_windows=cfg.n_windows,
-        )
+        analyzer = FractalAnalyzer(corpus=self.corpus)
 
         result = analyzer.analyze()
 
@@ -380,18 +374,20 @@ class Pipeline:
         cfg = self.config.permutation
         plm = PermutationLM(
             corpus=self.corpus,
-            max_sentences_per_unit=cfg.max_sentences_per_unit,
-            n_permutations_per_unit=cfg.n_permutations_per_unit,
             seed=cfg.seed,
         )
 
-        result = plm.generate_permutations()
+        result = plm.build_dataset(
+            max_perm_per_pericope=cfg.n_permutations_per_unit,
+            max_sentences=cfg.max_sentences_per_unit,
+        )
 
         results_summary = {
-            "n_units_processed": result.n_units,
-            "n_permutations_generated": result.n_permutations,
-            "total_training_samples": result.total_samples,
-            "expansion_factor": result.expansion_factor,
+            "n_pericopes_processed": result.n_pericopes,
+            "n_original": result.n_original,
+            "n_permuted": result.n_permuted,
+            "total_samples": len(result.samples),
+            "expansion_factor": result.factorial_expansion,
         }
 
         return results_summary
@@ -412,7 +408,6 @@ class Pipeline:
             corpus=self.corpus,
             latent_dim=cfg.latent_dim,
             hidden_dim=cfg.hidden_dim,
-            max_seq_length=cfg.max_seq_length,
         )
 
         result = vae.train(
@@ -424,8 +419,8 @@ class Pipeline:
 
         return {
             "final_loss": result.final_loss,
-            "final_reconstruction_loss": result.final_recon_loss,
-            "final_kl_loss": result.final_kl_loss,
+            "latent_dim": result.latent_dim,
+            "vocab_size": result.vocab_size,
             "n_epochs": cfg.n_epochs,
         }
 
@@ -471,17 +466,22 @@ class Pipeline:
             logger.warning("Semantic analyzer not available, skipping")
             return {"status": "skipped"}
 
-        analyzer = SemanticAnalyzer()
+        target_words = self.config.analysis.target_words
 
         # Analyze embeddings from each level
         for level, emb_result in self.embedding_results.items():
-            target_words = self.config.analysis.target_words
-            semantic_result = analyzer.analyze_theological_terms(
-                emb_result, target_words
+            analyzer = SemanticAnalyzer(
+                embedding_result=emb_result,
+                cross_epistle_result=self.cross_epistle_result,
             )
+            clusters = analyzer.build_semantic_clusters(words=target_words)
             results_summary[f"semantic_{level.value}"] = {
-                "n_clusters": semantic_result.n_clusters,
-                "clusters": semantic_result.cluster_labels,
+                "n_clusters": len(clusters),
+                "clusters": [
+                    {"words": c.words, "coherence": c.coherence,
+                     "theological_terms": c.theological_terms}
+                    for c in clusters
+                ],
             }
 
         # Generate visualizations
