@@ -1,0 +1,128 @@
+{
+  "total_elapsed_seconds": 6.578046083450317,
+  "phases_run": [
+    "corpus",
+    "fractal",
+    "permutation"
+  ],
+  "config": {
+    "undisputed_only": false,
+    "n_bootstrap_samples": 1000,
+    "embedding_dim": 100,
+    "n_target_words": 90
+  },
+  "results": {
+    "corpus": {
+      "epistles": 14,
+      "epistle_names": [
+        "Romans",
+        "1 Corinthians",
+        "2 Corinthians",
+        "Galatians",
+        "Philippians",
+        "1 Thessalonians",
+        "Philemon",
+        "Ephesians",
+        "Colossians",
+        "2 Thessalonians",
+        "1 Timothy",
+        "2 Timothy",
+        "Titus",
+        "Hebrews"
+      ],
+      "total_words": 37235,
+      "vocabulary_size": 7815,
+      "total_sentences": 1536,
+      "undisputed_only": false,
+      "is_greek": true,
+      "words_per_epistle": {
+        "Romans": 7055,
+        "1 Corinthians": 6812,
+        "2 Corinthians": 4473,
+        "Galatians": 2226,
+        "Philippians": 1626,
+        "1 Thessalonians": 1473,
+        "Philemon": 334,
+        "Ephesians": 2416,
+        "Colossians": 1580,
+        "2 Thessalonians": 820,
+        "1 Timothy": 1591,
+        "2 Timothy": 1235,
+        "Titus": 659,
+        "Hebrews": 4935
+      }
+    },
+    "fractal": {
+      "hurst_exponent": 0.6072463764385517,
+      "hurst_r_squared": 0.9994492719101773,
+      "dfa_exponent": 0.5602739681559477,
+      "dfa_r_squared": 0.9989526756755689,
+      "overall_fractal_score": 0.33684194653464306,
+      "per_epistle": {
+        "Romans": {
+          "H": 0.5777538520900224,
+          "r_squared": 0.9979783334087825
+        },
+        "1 Corinthians": {
+          "H": 0.6250254649465019,
+          "r_squared": 0.9975566342827163
+        },
+        "2 Corinthians": {
+          "H": 0.6367067903620058,
+          "r_squared": 0.9973621164773141
+        },
+        "Galatians": {
+          "H": 0.5785011515949933,
+          "r_squared": 0.9984808510655798
+        },
+        "Philippians": {
+          "H": 0.6198211470569229,
+          "r_squared": 0.9976696906551331
+        },
+        "1 Thessalonians": {
+          "H": 0.5652134925263018,
+          "r_squared": 0.9947942941854561
+        },
+        "Philemon": {
+          "H": 0.598365747746481,
+          "r_squared": 0.986586414155148
+        },
+        "Ephesians": {
+          "H": 0.5650484918953335,
+          "r_squared": 0.9971087548742776
+        },
+        "Colossians": {
+          "H": 0.6113850469929409,
+          "r_squared": 0.9967467889144405
+        },
+        "2 Thessalonians": {
+          "H": 0.5933204437476297,
+          "r_squared": 0.9946993564090467
+        },
+        "1 Timothy": {
+          "H": 0.623101827936865,
+          "r_squared": 0.9971970679429811
+        },
+        "2 Timothy": {
+          "H": 0.6018592065066112,
+          "r_squared": 0.997235276711179
+        },
+        "Titus": {
+          "H": 0.5974050937806007,
+          "r_squared": 0.9847726211237839
+        },
+        "Hebrews": {
+          "H": 0.6027349095284883,
+          "r_squared": 0.9992398761411329
+        }
+      }
+    },
+    "permutation": {
+      "n_pericopes_processed": 193,
+      "n_original": 193,
+      "n_permuted": 3653,
+      "total_samples": 3846,
+      "expansion_factor": 19.927461139896373
+    }
+  }
+}

@@ -1,0 +1,51 @@
+2026-02-01 14:45:45 [INFO] __main__: Starting Pauline Neural Study pipeline
+2026-02-01 14:45:45 [INFO] __main__: Phases to run: ['corpus', 'fractal', 'permutation']
+2026-02-01 14:45:45 [INFO] __main__: Output directory: output
+2026-02-01 14:45:45 [INFO] __main__: 
+============================================================
+2026-02-01 14:45:45 [INFO] __main__: PHASE: CORPUS
+2026-02-01 14:45:45 [INFO] __main__: ============================================================
+2026-02-01 14:45:45 [INFO] pauline.corpus.loader:   Loaded Romans: 334 units, 7055 words
+2026-02-01 14:45:45 [INFO] pauline.corpus.loader:   Loaded 1 Corinthians: 384 units, 6812 words
+2026-02-01 14:45:45 [INFO] pauline.corpus.loader:   Loaded 2 Corinthians: 175 units, 4473 words
+2026-02-01 14:45:45 [INFO] pauline.corpus.loader:   Loaded Galatians: 111 units, 2226 words
+2026-02-01 14:45:45 [INFO] pauline.corpus.loader:   Loaded Philippians: 55 units, 1626 words
+2026-02-01 14:45:45 [INFO] pauline.corpus.loader:   Loaded 1 Thessalonians: 50 units, 1473 words
+2026-02-01 14:45:45 [INFO] pauline.corpus.loader:   Loaded Philemon: 10 units, 334 words
+2026-02-01 14:45:45 [INFO] pauline.corpus.loader:   Loaded Ephesians: 55 units, 2416 words
+2026-02-01 14:45:45 [INFO] pauline.corpus.loader:   Loaded Colossians: 39 units, 1580 words
+2026-02-01 14:45:45 [INFO] pauline.corpus.loader:   Loaded 2 Thessalonians: 25 units, 820 words
+2026-02-01 14:45:45 [INFO] pauline.corpus.loader:   Loaded 1 Timothy: 61 units, 1591 words
+2026-02-01 14:45:45 [INFO] pauline.corpus.loader:   Loaded 2 Timothy: 46 units, 1235 words
+2026-02-01 14:45:45 [INFO] pauline.corpus.loader:   Loaded Titus: 27 units, 659 words
+2026-02-01 14:45:45 [INFO] pauline.corpus.loader:   Loaded Hebrews: 164 units, 4935 words
+2026-02-01 14:45:46 [INFO] __main__: Corpus loaded: 37235 words, 7815 unique, 14 epistles
+2026-02-01 14:45:46 [INFO] __main__: Phase corpus completed in 1.1s
+2026-02-01 14:45:46 [INFO] __main__: 
+============================================================
+2026-02-01 14:45:46 [INFO] __main__: PHASE: FRACTAL
+2026-02-01 14:45:46 [INFO] __main__: ============================================================
+2026-02-01 14:45:46 [INFO] pauline.fractal.analyzer: Fractal analysis: 37235 tokens, feature='frequency_rank', DFA orders=[1, 2]
+2026-02-01 14:45:49 [INFO] pauline.fractal.analyzer: Multi-scale co-occurrence: 200 vocabulary items, 3 scales (sentence, pericope, epistle)
+2026-02-01 14:45:51 [INFO] __main__: Phase fractal completed in 5.3s
+2026-02-01 14:45:51 [INFO] __main__: 
+============================================================
+2026-02-01 14:45:51 [INFO] __main__: PHASE: PERMUTATION
+2026-02-01 14:45:51 [INFO] __main__: ============================================================
+2026-02-01 14:45:51 [INFO] pauline.permutation.plm: Collected 194 pericopes/chunks
+2026-02-01 14:45:51 [INFO] pauline.permutation.plm: Built PLM dataset: 193 pericopes, 3846 samples (19.9x expansion), max 8 sentences
+2026-02-01 14:45:51 [INFO] __main__: Phase permutation completed in 0.2s
+2026-02-01 14:45:51 [INFO] __main__: 
+============================================================
+2026-02-01 14:45:51 [INFO] __main__: Pipeline completed in 6.6s
+2026-02-01 14:45:51 [INFO] __main__: ============================================================
+2026-02-01 14:45:51 [INFO] __main__: Summary saved to output/pipeline_summary.json
+
+============================================================
+PIPELINE COMPLETE
+============================================================
+  corpus: OK
+  fractal: OK
+  permutation: OK
+
+Results saved to: output/

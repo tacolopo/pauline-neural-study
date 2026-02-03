@@ -1,0 +1,104 @@
+2026-02-01 03:02:39 [INFO] __main__: Starting Pauline Neural Study pipeline
+2026-02-01 03:02:39 [INFO] __main__: Phases to run: ['corpus', 'fractal', 'permutation', 'vae', 'bayesian', 'analysis']
+2026-02-01 03:02:39 [INFO] __main__: Output directory: output
+2026-02-01 03:02:39 [INFO] __main__: 
+============================================================
+2026-02-01 03:02:39 [INFO] __main__: PHASE: CORPUS
+2026-02-01 03:02:39 [INFO] __main__: ============================================================
+2026-02-01 03:02:39 [INFO] pauline.corpus.loader:   Loaded Romans: 334 units, 7055 words
+2026-02-01 03:02:39 [INFO] pauline.corpus.loader:   Loaded 1 Corinthians: 384 units, 6812 words
+2026-02-01 03:02:39 [INFO] pauline.corpus.loader:   Loaded 2 Corinthians: 175 units, 4473 words
+2026-02-01 03:02:39 [INFO] pauline.corpus.loader:   Loaded Galatians: 111 units, 2226 words
+2026-02-01 03:02:39 [INFO] pauline.corpus.loader:   Loaded Philippians: 55 units, 1626 words
+2026-02-01 03:02:39 [INFO] pauline.corpus.loader:   Loaded 1 Thessalonians: 50 units, 1473 words
+2026-02-01 03:02:39 [INFO] pauline.corpus.loader:   Loaded Philemon: 10 units, 334 words
+2026-02-01 03:02:39 [INFO] pauline.corpus.loader:   Loaded Ephesians: 55 units, 2416 words
+2026-02-01 03:02:39 [INFO] pauline.corpus.loader:   Loaded Colossians: 39 units, 1580 words
+2026-02-01 03:02:39 [INFO] pauline.corpus.loader:   Loaded 2 Thessalonians: 25 units, 820 words
+2026-02-01 03:02:39 [INFO] pauline.corpus.loader:   Loaded 1 Timothy: 61 units, 1591 words
+2026-02-01 03:02:39 [INFO] pauline.corpus.loader:   Loaded 2 Timothy: 46 units, 1235 words
+2026-02-01 03:02:39 [INFO] pauline.corpus.loader:   Loaded Titus: 27 units, 659 words
+2026-02-01 03:02:39 [INFO] pauline.corpus.loader:   Loaded Hebrews: 164 units, 4935 words
+2026-02-01 03:02:40 [INFO] __main__: Corpus loaded: 37235 words, 7815 unique, 14 epistles
+2026-02-01 03:02:40 [INFO] __main__: Phase corpus completed in 1.0s
+2026-02-01 03:02:40 [INFO] __main__: 
+============================================================
+2026-02-01 03:02:40 [INFO] __main__: PHASE: FRACTAL
+2026-02-01 03:02:40 [INFO] __main__: ============================================================
+2026-02-01 03:02:40 [INFO] pauline.fractal.analyzer: Fractal analysis: 37235 tokens, feature='frequency_rank', DFA orders=[1, 2]
+2026-02-01 03:02:43 [INFO] pauline.fractal.analyzer: Multi-scale co-occurrence: 200 vocabulary items, 3 scales (sentence, pericope, epistle)
+2026-02-01 03:02:45 [ERROR] __main__: Phase fractal failed: 'FractalResult' object has no attribute 'hurst_exponent'
+Traceback (most recent call last):
+  File "/home/amroknox/pauline-neural-study/src/pauline/pipeline.py", line 99, in run
+    results[phase] = self._run_fractal()
+  File "/home/amroknox/pauline-neural-study/src/pauline/pipeline.py", line 352, in _run_fractal
+    "hurst_exponent": result.hurst_exponent,
+AttributeError: 'FractalResult' object has no attribute 'hurst_exponent'
+2026-02-01 03:02:45 [INFO] __main__: 
+============================================================
+2026-02-01 03:02:45 [INFO] __main__: PHASE: PERMUTATION
+2026-02-01 03:02:45 [INFO] __main__: ============================================================
+2026-02-01 03:02:45 [INFO] pauline.permutation.plm: Collected 14 pericopes/chapters
+2026-02-01 03:02:45 [INFO] pauline.permutation.plm: Built PLM dataset: 0 pericopes, 0 samples (0.0x expansion), max 0 sentences
+2026-02-01 03:02:45 [INFO] __main__: Phase permutation completed in 0.2s
+2026-02-01 03:02:45 [INFO] __main__: 
+============================================================
+2026-02-01 03:02:45 [INFO] __main__: PHASE: VAE
+2026-02-01 03:02:45 [INFO] __main__: ============================================================
+2026-02-01 03:02:48 [INFO] pauline.vae.model: VAE vocabulary: 2757 words (min freq >= 2)
+2026-02-01 03:02:57 [INFO] pauline.vae.model: Training VAE: 1536 sentences, 2757 vocab, 64-dim latent, device=cpu
+2026-02-01 03:02:58 [INFO] pauline.vae.model: Epoch 1/100: loss=6.8881 (recon=6.8881, kl=0.3679, kl_w=0.000)
+2026-02-01 03:03:07 [INFO] pauline.vae.model: Epoch 10/100: loss=6.2738 (recon=6.2718, kl=0.0093, kl_w=0.225)
+2026-02-01 03:03:17 [INFO] pauline.vae.model: Epoch 20/100: loss=6.2554 (recon=6.2548, kl=0.0013, kl_w=0.475)
+2026-02-01 03:03:28 [INFO] pauline.vae.model: Epoch 30/100: loss=6.2460 (recon=6.2457, kl=0.0007, kl_w=0.500)
+2026-02-01 03:03:39 [INFO] pauline.vae.model: Epoch 40/100: loss=6.2427 (recon=6.2425, kl=0.0005, kl_w=0.500)
+2026-02-01 03:03:49 [INFO] pauline.vae.model: Epoch 50/100: loss=6.2359 (recon=6.2358, kl=0.0003, kl_w=0.500)
+2026-02-01 03:04:00 [INFO] pauline.vae.model: Epoch 60/100: loss=6.2367 (recon=6.2365, kl=0.0003, kl_w=0.500)
+2026-02-01 03:04:11 [INFO] pauline.vae.model: Epoch 70/100: loss=6.2363 (recon=6.2362, kl=0.0002, kl_w=0.500)
+2026-02-01 03:04:22 [INFO] pauline.vae.model: Epoch 80/100: loss=6.2343 (recon=6.2342, kl=0.0002, kl_w=0.500)
+2026-02-01 03:04:33 [INFO] pauline.vae.model: Epoch 90/100: loss=6.2335 (recon=6.2334, kl=0.0002, kl_w=0.500)
+2026-02-01 03:04:44 [INFO] pauline.vae.model: Epoch 100/100: loss=6.2329 (recon=6.2328, kl=0.0002, kl_w=0.500)
+2026-02-01 03:04:45 [INFO] pauline.vae.model: Calibrated anomaly baseline: mean=6.2108, std=0.5616
+2026-02-01 03:04:45 [INFO] pauline.vae.model: Training complete. Final loss: 6.2329
+2026-02-01 03:04:45 [INFO] __main__: Phase vae completed in 120.4s
+2026-02-01 03:04:45 [INFO] __main__: 
+============================================================
+2026-02-01 03:04:45 [INFO] __main__: PHASE: BAYESIAN
+2026-02-01 03:04:45 [INFO] __main__: ============================================================
+2026-02-01 03:04:46 [INFO] pauline.bayesian.model: Prepared Bayesian model: 14 documents, 2757 vocabulary, 10 topics
+2026-02-01 03:04:46 [INFO] pauline.bayesian.model: Starting Gibbs sampling: 1000 iterations
+2026-02-01 03:06:21 [INFO] pauline.bayesian.model:   Iteration 100/1000, log-likelihood: -226103.56
+2026-02-01 03:07:55 [INFO] pauline.bayesian.model:   Iteration 200/1000, log-likelihood: -222406.55
+2026-02-01 03:09:30 [INFO] pauline.bayesian.model:   Iteration 300/1000, log-likelihood: -221047.69
+2026-02-01 03:11:05 [INFO] pauline.bayesian.model:   Iteration 400/1000, log-likelihood: -220602.14
+2026-02-01 03:12:40 [INFO] pauline.bayesian.model:   Iteration 500/1000, log-likelihood: -219319.60
+2026-02-01 03:14:15 [INFO] pauline.bayesian.model:   Iteration 600/1000, log-likelihood: -219385.11
+2026-02-01 03:15:50 [INFO] pauline.bayesian.model:   Iteration 700/1000, log-likelihood: -220027.77
+2026-02-01 03:17:24 [INFO] pauline.bayesian.model:   Iteration 800/1000, log-likelihood: -220724.34
+2026-02-01 03:18:59 [INFO] pauline.bayesian.model:   Iteration 900/1000, log-likelihood: -219838.33
+2026-02-01 03:20:33 [INFO] pauline.bayesian.model:   Iteration 1000/1000, log-likelihood: -219459.25
+2026-02-01 03:20:33 [INFO] pauline.bayesian.model: Gibbs sampling complete
+2026-02-01 03:20:33 [INFO] __main__: Phase bayesian completed in 947.7s
+2026-02-01 03:20:33 [INFO] __main__: 
+============================================================
+2026-02-01 03:20:33 [INFO] __main__: PHASE: ANALYSIS
+2026-02-01 03:20:33 [INFO] __main__: ============================================================
+2026-02-01 03:20:34 [INFO] pauline.analysis.visualization: Visualizer initialized, output directory: output
+2026-02-01 03:20:34 [INFO] __main__: Phase analysis completed in 1.3s
+2026-02-01 03:20:34 [INFO] __main__: 
+============================================================
+2026-02-01 03:20:34 [INFO] __main__: Pipeline completed in 1075.7s
+2026-02-01 03:20:34 [INFO] __main__: ============================================================
+2026-02-01 03:20:34 [INFO] __main__: Summary saved to output/pipeline_summary.json
+
+============================================================
+PIPELINE COMPLETE
+============================================================
+  corpus: OK
+  fractal: FAILED - 'FractalResult' object has no attribute 'hurst_exponent'
+  permutation: OK
+  vae: OK
+  bayesian: OK
+  analysis: OK
+
+Results saved to: output/

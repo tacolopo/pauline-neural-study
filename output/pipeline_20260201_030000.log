@@ -1,0 +1,69 @@
+2026-02-01 03:00:02 [INFO] __main__: Starting Pauline Neural Study pipeline
+2026-02-01 03:00:02 [INFO] __main__: Phases to run: ['fractal', 'permutation', 'vae', 'bayesian', 'analysis']
+2026-02-01 03:00:02 [INFO] __main__: Output directory: output
+2026-02-01 03:00:02 [INFO] __main__: 
+============================================================
+2026-02-01 03:00:02 [INFO] __main__: PHASE: FRACTAL
+2026-02-01 03:00:02 [INFO] __main__: ============================================================
+2026-02-01 03:00:02 [ERROR] __main__: Phase fractal failed: Corpus must be loaded before fractal phase
+Traceback (most recent call last):
+  File "/home/amroknox/pauline-neural-study/src/pauline/pipeline.py", line 99, in run
+    results[phase] = self._run_fractal()
+  File "/home/amroknox/pauline-neural-study/src/pauline/pipeline.py", line 339, in _run_fractal
+    raise RuntimeError("Corpus must be loaded before fractal phase")
+RuntimeError: Corpus must be loaded before fractal phase
+2026-02-01 03:00:02 [INFO] __main__: 
+============================================================
+2026-02-01 03:00:02 [INFO] __main__: PHASE: PERMUTATION
+2026-02-01 03:00:02 [INFO] __main__: ============================================================
+2026-02-01 03:00:02 [ERROR] __main__: Phase permutation failed: Corpus must be loaded before permutation phase
+Traceback (most recent call last):
+  File "/home/amroknox/pauline-neural-study/src/pauline/pipeline.py", line 101, in run
+    results[phase] = self._run_permutation()
+  File "/home/amroknox/pauline-neural-study/src/pauline/pipeline.py", line 366, in _run_permutation
+    raise RuntimeError("Corpus must be loaded before permutation phase")
+RuntimeError: Corpus must be loaded before permutation phase
+2026-02-01 03:00:02 [INFO] __main__: 
+============================================================
+2026-02-01 03:00:02 [INFO] __main__: PHASE: VAE
+2026-02-01 03:00:02 [INFO] __main__: ============================================================
+2026-02-01 03:00:02 [ERROR] __main__: Phase vae failed: Corpus must be loaded before VAE phase
+Traceback (most recent call last):
+  File "/home/amroknox/pauline-neural-study/src/pauline/pipeline.py", line 103, in run
+    results[phase] = self._run_vae()
+  File "/home/amroknox/pauline-neural-study/src/pauline/pipeline.py", line 398, in _run_vae
+    raise RuntimeError("Corpus must be loaded before VAE phase")
+RuntimeError: Corpus must be loaded before VAE phase
+2026-02-01 03:00:02 [INFO] __main__: 
+============================================================
+2026-02-01 03:00:02 [INFO] __main__: PHASE: BAYESIAN
+2026-02-01 03:00:02 [INFO] __main__: ============================================================
+2026-02-01 03:00:02 [ERROR] __main__: Phase bayesian failed: Corpus must be loaded before Bayesian phase
+Traceback (most recent call last):
+  File "/home/amroknox/pauline-neural-study/src/pauline/pipeline.py", line 105, in run
+    results[phase] = self._run_bayesian()
+  File "/home/amroknox/pauline-neural-study/src/pauline/pipeline.py", line 430, in _run_bayesian
+    raise RuntimeError("Corpus must be loaded before Bayesian phase")
+RuntimeError: Corpus must be loaded before Bayesian phase
+2026-02-01 03:00:02 [INFO] __main__: 
+============================================================
+2026-02-01 03:00:02 [INFO] __main__: PHASE: ANALYSIS
+2026-02-01 03:00:02 [INFO] __main__: ============================================================
+2026-02-01 03:00:03 [INFO] pauline.analysis.visualization: Visualizer initialized, output directory: output
+2026-02-01 03:00:03 [INFO] __main__: Phase analysis completed in 1.2s
+2026-02-01 03:00:03 [INFO] __main__: 
+============================================================
+2026-02-01 03:00:03 [INFO] __main__: Pipeline completed in 1.2s
+2026-02-01 03:00:03 [INFO] __main__: ============================================================
+2026-02-01 03:00:03 [INFO] __main__: Summary saved to output/pipeline_summary.json
+
+============================================================
+PIPELINE COMPLETE
+============================================================
+  fractal: FAILED - Corpus must be loaded before fractal phase
+  permutation: FAILED - Corpus must be loaded before permutation phase
+  vae: FAILED - Corpus must be loaded before VAE phase
+  bayesian: FAILED - Corpus must be loaded before Bayesian phase
+  analysis: OK
+
+Results saved to: output/

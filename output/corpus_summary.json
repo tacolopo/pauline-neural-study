@@ -1,0 +1,40 @@
+{
+  "epistles": 14,
+  "epistle_names": [
+    "Romans",
+    "1 Corinthians",
+    "2 Corinthians",
+    "Galatians",
+    "Philippians",
+    "1 Thessalonians",
+    "Philemon",
+    "Ephesians",
+    "Colossians",
+    "2 Thessalonians",
+    "1 Timothy",
+    "2 Timothy",
+    "Titus",
+    "Hebrews"
+  ],
+  "total_words": 37235,
+  "vocabulary_size": 7815,
+  "total_sentences": 1536,
+  "undisputed_only": false,
+  "is_greek": true,
+  "words_per_epistle": {
+    "Romans": 7055,
+    "1 Corinthians": 6812,
+    "2 Corinthians": 4473,
+    "Galatians": 2226,
+    "Philippians": 1626,
+    "1 Thessalonians": 1473,
+    "Philemon": 334,
+    "Ephesians": 2416,
+    "Colossians": 1580,
+    "2 Thessalonians": 820,
+    "1 Timothy": 1591,
+    "2 Timothy": 1235,
+    "Titus": 659,
+    "Hebrews": 4935
+  }
+}
