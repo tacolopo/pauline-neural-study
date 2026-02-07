@@ -81,7 +81,7 @@ ALL_EPISTLES = list(PAULINE_EPISTLES.keys())
 def _is_greek(text: str) -> bool:
     """Detect if text is primarily Greek by checking character scripts."""
     greek_chars = sum(1 for ch in text if unicodedata.category(ch).startswith("L")
-                      and "\u0370" <= ch <= "\u03FF" or "\u1F00" <= ch <= "\u1FFF")
+                      and ("\u0370" <= ch <= "\u03FF" or "\u1F00" <= ch <= "\u1FFF"))
     latin_chars = sum(1 for ch in text if unicodedata.category(ch).startswith("L")
                       and "A" <= ch <= "z")
     return greek_chars > latin_chars

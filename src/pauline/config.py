@@ -169,6 +169,9 @@ class PipelineConfig:
         "cross_epistle",
         "combinatorial",
         "fractal",
+        "permutation",
+        "vae",
+        "bayesian",
         "analysis",
     ])
 

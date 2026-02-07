@@ -57,6 +57,7 @@ BIBLE_API_BOOKS = {
     "1 Timothy": "1 Timothy",
     "2 Timothy": "2 Timothy",
     "Titus": "Titus",
+    "Hebrews": "Hebrews",
 }
 
 # Chapter counts for each epistle
@@ -74,6 +75,7 @@ EPISTLE_CHAPTERS = {
     "1 Timothy": 6,
     "2 Timothy": 4,
     "Titus": 3,
+    "Hebrews": 13,
 }
 
 
