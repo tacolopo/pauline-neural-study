@@ -693,7 +693,7 @@ class Visualizer:
                 widths = np.full_like(sim_array, (width_min + width_max) / 2)
 
             # Edge color from stability
-            edge_cmap = cm.get_cmap("RdYlGn")
+            edge_cmap = matplotlib.colormaps["RdYlGn"]
             edge_colors = [edge_cmap(s) for s in stab_array]
 
             edges = list(G.edges())

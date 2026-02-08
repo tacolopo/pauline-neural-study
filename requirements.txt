@@ -12,7 +12,7 @@ numpy>=1.24.0
 scipy>=1.10.0
 
 # --- NLP ---
-gensim>=4.3.0          # Word2Vec embeddings
+gensim>=4.4.0          # Word2Vec embeddings (4.4 required for NumPy 2.0 compat)
 nltk>=3.8.0            # Tokenization, POS tagging
 
 # --- Machine Learning ---

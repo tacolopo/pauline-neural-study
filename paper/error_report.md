@@ -151,6 +151,48 @@ TypeError: TSNE.__init__() got an unexpected keyword argument 'n_iter'
 
 **Status:** FIXED — all 3 occurrences changed from `n_iter` to `max_iter`.
 
+### 3.5 `cm.get_cmap()` Removed in matplotlib 3.9+
+
+**File:** `src/pauline/analysis/visualization.py:696`
+
+**Was:**
+```python
+edge_cmap = cm.get_cmap("RdYlGn")
+```
+
+**The problem:** `matplotlib.cm.get_cmap()` was deprecated in matplotlib 3.7 and removed in 3.9. Since `requirements.txt` specifies `matplotlib>=3.7.0`, a fresh pip install gets matplotlib 3.9+ where this call raises `AttributeError`.
+
+**Impact:** Medium. Would crash the `plot_word_network()` visualization during the analysis phase.
+
+**Status:** FIXED — changed to `matplotlib.colormaps["RdYlGn"]`.
+
+### 3.6 gensim 4.3.x Incompatible with NumPy 2.0
+
+**File:** `requirements.txt`, `pyproject.toml`
+
+**Was:** `gensim>=4.3.0`
+
+**The problem:** gensim 4.3.x has hard upper bounds (`numpy<2.0`, `scipy<1.14.0`). Since the other constraints allow NumPy 2.0+ and SciPy 1.14+, pip cannot resolve dependencies — gensim 4.3.x refuses to install alongside modern numpy/scipy. gensim 4.4.0 adds NumPy 2.0 compatibility.
+
+**Impact:** Critical. The `pip install` would fail entirely or force downgrades of numpy/scipy, breaking other packages.
+
+**Status:** FIXED — bumped to `gensim>=4.4.0` in both `requirements.txt` and `pyproject.toml`.
+
+### 3.7 `torch.load` Default Changed in PyTorch 2.6+
+
+**File:** `src/pauline/vae/model.py:743`
+
+**Was:**
+```python
+checkpoint = torch.load(path, map_location=self.device)
+```
+
+**The problem:** PyTorch 2.6 changed `torch.load()` to default to `weights_only=True`, which only allows loading tensors and primitive types. The VAE checkpoint contains dicts with vocabulary lists (strings) and numpy arrays, which would raise `UnpicklingError`.
+
+**Impact:** Medium. Would crash when loading a saved VAE model.
+
+**Status:** FIXED — added `weights_only=False`.
+
 ---
 
 ## 4. GCP Run Analysis (2026-02-07)
@@ -214,3 +256,6 @@ Re-run the pipeline after all code fixes (phases, TSNE) to produce a complete 10
 | 3.2 | Code bug | Low | `loader.py:83` — operator precedence | FIXED |
 | 3.3 | Code bug | Medium | `fetch.py:46,63` — Hebrews missing | FIXED |
 | 3.4 | Code bug | High | `visualization.py` — TSNE n_iter deprecated | FIXED |
+| 3.5 | Code bug | Medium | `visualization.py:696` — cm.get_cmap() removed in mpl 3.9 | FIXED |
+| 3.6 | Dependency | Critical | `requirements.txt` — gensim 4.3.x blocks NumPy 2.0 | FIXED |
+| 3.7 | Code bug | Medium | `vae/model.py:743` — torch.load weights_only default changed | FIXED |

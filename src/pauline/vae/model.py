@@ -740,7 +740,7 @@ class PaulineVAE:
 
     def load(self, path: str) -> None:
         """Load model weights and vocabulary from disk."""
-        checkpoint = torch.load(path, map_location=self.device)
+        checkpoint = torch.load(path, map_location=self.device, weights_only=False)
         self.vocabulary = checkpoint["vocabulary"]
         self.vocab_size = checkpoint["vocab_size"]
         self.latent_dim = checkpoint["latent_dim"]
