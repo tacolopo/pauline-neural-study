@@ -271,7 +271,7 @@ class Visualizer:
                 n_components=2,
                 perplexity=min(perplexity, len(vocabulary) - 1),
                 random_state=random_state,
-                n_iter=1000,
+                max_iter=1000,
             )
             coords_2d = reducer.fit_transform(embeddings)
         elif method == "umap":
@@ -828,7 +828,7 @@ class Visualizer:
                 n_components=2,
                 perplexity=min(perplexity, len(words) - 1),
                 random_state=random_state,
-                n_iter=1000,
+                max_iter=1000,
             )
             coords_2d = reducer.fit_transform(vectors)
         else:
@@ -1470,7 +1470,7 @@ class Visualizer:
             n_components=2,
             perplexity=min(30, len(vocabulary) - 1),
             random_state=42,
-            n_iter=500,
+            max_iter=500,
         )
         coords_2d = reducer.fit_transform(embeddings)
 

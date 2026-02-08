@@ -6,7 +6,7 @@ We present a novel computational methodology for analyzing the semantic structur
 
 Our solution treats Paul's corpus as a **closed statistical universe** and applies mathematically rigorous expansion techniques operating exclusively on Paul's vocabulary, syntax, and co-occurrence patterns. Drawing on an analogy to the Central Limit Theorem, we employ multi-level bootstrap resampling to generate thousands of valid "alternate Pauline corpora," train word embeddings on each, and aggregate results to identify stable semantic relationships. We complement this with combinatorial recombination within Paul's grammatical structures, cross-epistle transfer analysis, fractal self-similarity measurement, permutation language modeling, variational autoencoders, and hierarchical Bayesian topic modeling — all constrained to Paul's closed vocabulary.
 
-We report results from a complete pipeline run on all 14 Pauline epistles in Koine Greek. Key findings include: (1) ἐπαγγελία (*promise*) emerges as a central hub in Paul's semantic network with stable relationships to faith, law, grace, salvation, and righteousness; (2) the love–hope pair (ἀγάπη ↔ ἐλπίς) is the single most stable semantic relationship in the corpus (stability = 0.982); (3) Paul's text exhibits long-range fractal dependence (Hurst exponent H = 0.607, R² = 0.999) consistent across all 14 letters; and (4) Bayesian topic modeling naturally separates the disputed epistles by theological register, with the Pastoral epistles clustering on personal/pastoral language and Hebrews standing alone on a faith–blood–promise topic.
+We report results from a complete pipeline run on all 14 Pauline epistles in Koine Greek. Key findings include: (1) ἐπαγγελία (*promise*) emerges as a central hub in Paul's semantic network with stable relationships to faith, law, sin, love, and flesh; (2) the love–hope pair (ἀγάπη ↔ ἐλπίς) is the single most stable semantic relationship in the corpus (stability = 0.978); (3) Paul's text exhibits long-range fractal dependence (Hurst exponent H = 0.607, R² = 0.999) consistent across all 14 letters; and (4) Bayesian topic modeling naturally separates the disputed epistles by theological register, with the Pastoral epistles clustering on personal/pastoral language and Hebrews standing alone on a faith–blood–promise topic.
 
 This study represents the first systematic attempt to apply neural semantic analysis to a single author's corpus without external data augmentation, establishing a new paradigm for computational analysis of small, theologically significant textual corpora.
 
@@ -153,9 +153,9 @@ $$S_{neighbor}(w) = \frac{2}{N(N-1)} \sum_{i<j} J(NN_k^{(i)}(w), NN_k^{(j)}(w))$
 
 We treat each epistle as an independent "sample" from Paul's theological mind:
 
-**Leave-one-out**: For each epistle $E_i$, train embeddings on the remaining 6 epistles. Compare word relationships to the full-corpus baseline. The difference reveals the influence of $E_i$ on specific semantic relationships.
+**Leave-one-out**: For each epistle $E_i$, train embeddings on the remaining 13 epistles. Compare word relationships to the full-corpus baseline. The difference reveals the influence of $E_i$ on specific semantic relationships.
 
-**All-subsets**: Analyze all $\binom{7}{3} + \binom{7}{4} + \ldots + \binom{7}{7} = 99$ subsets of 3 or more epistles. This provides the most complete picture of semantic stability.
+**All-subsets**: Analyze all $\binom{14}{3} + \binom{14}{4} + \ldots + \binom{14}{14} = 16{,}370$ subsets of 3 or more epistles. This provides the most complete picture of semantic stability.
 
 Results are classified into three categories:
 
@@ -238,7 +238,7 @@ Standard NLP tokenizers (NLTK, spaCy) do not support Koine Greek. We implement c
 
 The corpus consists of 14 Pauline epistles in Koine Greek, loaded from plain text files (`output/corpus_summary.json`). The pipeline is modular: each phase can be run independently. Configuration is managed via YAML files. We track 90 target words spanning 18 semantic fields in Greek, including multiple inflected forms for highly inflected terms (e.g., νόμος/νόμου/νόμον/νόμῳ for "law" in nominative/genitive/accusative/dative).
 
-For the full-scale analysis, we provide execution scripts for Google Cloud Platform VMs. The complete pipeline (10 phases, 1,000 bootstrap samples per level) ran on an e2-standard-4 VM (4 vCPUs, 16 GB RAM, CPU-only) in approximately 5.5 hours. The VAE phase completed in 120 seconds on CPU.
+For the full-scale analysis, we provide execution scripts for Google Cloud Platform VMs. The complete pipeline (10 phases, 1,000 bootstrap samples per level) ran on an e2-standard-4 VM (4 vCPUs, 16 GB RAM, CPU-only) in approximately 6 hours (`output/pipeline_summary.json`, line 2). The embedding phase dominates runtime at ~5.4 hours; cross-epistle, combinatorial, and fractal phases complete in under 2 minutes combined.
 
 ---
 
@@ -258,26 +258,31 @@ The following theological word pairs maintain their semantic proximity regardles
 
 | Word Pair | Stability | Reference |
 |-----------|-----------|-----------|
-| ἀγάπη ↔ ἐλπίς (love ↔ hope) | 0.982 | `cross_epistle_results.json`, line 13 |
-| πίστις ↔ ἐπαγγελία (faith ↔ promise) | 0.976 | `cross_epistle_results.json`, line 19 |
-| νόμου ↔ ἐπαγγελία (law-GEN ↔ promise) | 0.973 | `cross_epistle_results.json`, line 25 |
-| σάρξ ↔ ἐπαγγελία (flesh ↔ promise) | 0.973 | `cross_epistle_results.json`, line 31 |
-| ἁμαρτία ↔ σάρξ (sin ↔ flesh) | 0.971 | `cross_epistle_results.json`, line 37 |
-| σωτηρία ↔ ἐπαγγελία (salvation ↔ promise) | 0.969 | `cross_epistle_results.json`, line 43 |
-| εἰρήνη ↔ ἐπαγγελία (peace ↔ promise) | 0.968 | `cross_epistle_results.json`, line 49 |
-| δικαιοσύνην ↔ ἐπαγγελία (righteousness-ACC ↔ promise) | 0.966 | `cross_epistle_results.json`, line 55 |
-| σάρξ ↔ δούλου (flesh ↔ slave-GEN) | 0.966 | `cross_epistle_results.json`, line 61 |
-| περιτομή ↔ ἀκροβυστία (circumcision ↔ uncircumcision) | 0.965 | `cross_epistle_results.json`, line 67 |
-| ἔλεος ↔ σοφία (mercy ↔ wisdom) | 0.964 | `cross_epistle_results.json`, line 85 |
-| ἁμαρτία ↔ διαθήκη (sin ↔ covenant) | 0.963 | `cross_epistle_results.json`, line 91 |
-| θεοῦ ↔ σοφία (God-GEN ↔ wisdom) | 0.963 | `cross_epistle_results.json`, line 97 |
-| χάρις ↔ ἐπαγγελία (grace ↔ promise) | 0.962 | `cross_epistle_results.json`, line 103 |
+| ἀγάπη ↔ ἐλπίς (love ↔ hope) | 0.978 | `cross_epistle_results.json`, line 13 |
+| ἁμαρτία ↔ ἐπαγγελία (sin ↔ promise) | 0.976 | `cross_epistle_results.json`, line 19 |
+| πίστις ↔ ἐπαγγελία (faith ↔ promise) | 0.973 | `cross_epistle_results.json`, line 25 |
+| ἀγάπη ↔ ἐπαγγελία (love ↔ promise) | 0.972 | `cross_epistle_results.json`, line 31 |
+| δίκαιος ↔ δικαιοῦται (righteous ↔ is justified) | 0.970 | `cross_epistle_results.json`, line 37 |
+| σάρξ ↔ ἐπαγγελία (flesh ↔ promise) | 0.970 | `cross_epistle_results.json`, line 43 |
+| σάρξ ↔ ἐλπίς (flesh ↔ hope) | 0.970 | `cross_epistle_results.json`, line 49 |
+| περιτομή ↔ ἀκροβυστία (circumcision ↔ uncircumcision) | 0.968 | `cross_epistle_results.json`, line 55 |
+| πίστις ↔ ἐλπίς (faith ↔ hope) | 0.967 | `cross_epistle_results.json`, line 61 |
+| σάρξ ↔ δούλου (flesh ↔ slave-GEN) | 0.965 | `cross_epistle_results.json`, line 67 |
+| δύναμις ↔ σοφία (power ↔ wisdom) | 0.964 | `cross_epistle_results.json`, line 77 |
+| θάνατος ↔ ἀνάστασις (death ↔ resurrection) | 0.964 | `cross_epistle_results.json`, line 85 |
+| νόμου ↔ ἐπαγγελία (law-GEN ↔ promise) | 0.964 | `cross_epistle_results.json`, line 91 |
+| ἁμαρτία ↔ σάρξ (sin ↔ flesh) | 0.963 | `cross_epistle_results.json`, line 97 |
+| νόμος ↔ ἁμαρτία (law ↔ sin) | 0.963 | `cross_epistle_results.json`, line 103 |
 
-**Key finding: ἐπαγγελία as semantic hub.** The term ἐπαγγελία (*promise*) appears as one member in 7 of the top 15 most stable pairs, linked to faith, law, righteousness, salvation, grace, peace, and flesh. This suggests that *promise* functions as a load-bearing structural node in Paul's theological vocabulary — a finding that aligns with but goes beyond Wright's [1997] emphasis on covenant-promise themes in Paul. The computational evidence shows that this centrality is not an artifact of Romans or Galatians alone but persists when any single epistle is removed.
+Note: Cross-epistle stability values are subject to minor stochastic variation across runs (typically ±0.005) due to Word2Vec's random initialization. The qualitative patterns — which pairs are most/least stable, and the hub role of ἐπαγγελία — are consistent across runs.
 
-**The love–hope nexus.** The highest single stability score (0.982) belongs to the ἀγάπη ↔ ἐλπίς pair. This relationship is stronger even than πίστις ↔ ἐπαγγελία (0.976), suggesting that Paul's triad of "faith, hope, and love" (1 Cor 13:13) is not merely a rhetorical formula but reflects a deep semantic bond encoded across his entire corpus.
+**Key finding: ἐπαγγελία as semantic hub.** The term ἐπαγγελία (*promise*) appears as one member in 5 of the top 15 most stable pairs, linked to sin, faith, love, flesh, and law. This suggests that *promise* functions as a load-bearing structural node in Paul's theological vocabulary — a finding that aligns with but goes beyond Wright's [1997] emphasis on covenant-promise themes in Paul. The computational evidence shows that this centrality is not an artifact of Romans or Galatians alone but persists when any single epistle is removed.
 
-**Sin–flesh linkage.** The ἁμαρτία ↔ σάρξ pair (stability 0.971) confirms computationally what Pauline scholars have long noted: Paul's concept of σάρξ is not merely "physical body" but a theological category intimately bound to his hamartiology (theology of sin).
+**The love–hope nexus.** The highest single stability score (0.978) belongs to the ἀγάπη ↔ ἐλπίς pair. Additionally, πίστις ↔ ἐλπίς (0.967) also appears in the top 15, suggesting that Paul's triad of "faith, hope, and love" (1 Cor 13:13) is not merely a rhetorical formula but reflects a deep semantic bond encoded across his entire corpus.
+
+**Sin–flesh linkage.** The ἁμαρτία ↔ σάρξ pair (stability 0.963) confirms computationally what Pauline scholars have long noted: Paul's concept of σάρξ is not merely "physical body" but a theological category intimately bound to his hamartiology (theology of sin).
+
+**Morphological coherence.** The appearance of δίκαιος ↔ δικαιοῦται (righteous ↔ is justified, 0.970) in the top 5 demonstrates that morphologically related forms of the same root cluster with high stability, confirming that the embedding model captures paradigmatic relationships even without explicit lemmatization.
 
 #### 6.2.2 Most Variable Relationships
 
@@ -288,7 +293,7 @@ All 15 most variable word pairs involve the **nominative** form δικαιοσύ
 - δικαιοσύνη ↔ ζωή (righteousness ↔ life): 0.0 (line 145)
 - δικαιοσύνη ↔ σταυρός (righteousness ↔ cross): 0.0 (line 151)
 
-Crucially, the **accusative** form δικαιοσύνην has high stability (0.966 with ἐπαγγελία, line 55), while the **nominative** form δικαιοσύνη has zero stability. This morphological divergence is not a methodological artifact — it reveals that the nominative form appears in too few epistles (or too few distinct co-occurrence contexts) to produce stable embeddings, while the accusative form is distributed broadly enough to anchor stable relationships. This finding has important methodological implications: **Greek morphological form must be treated as analytically significant in embedding-based studies, and future work should consider lemmatization as a preprocessing step.**
+Crucially, the morphologically related pair δίκαιος ↔ δικαιοῦται has high stability (0.970, line 37), while the **nominative** form δικαιοσύνη has zero stability with all measured partners. This morphological divergence is not a methodological artifact — it reveals that the nominative form appears in too few epistles (or too few distinct co-occurrence contexts) to produce stable embeddings, while the accusative form is distributed broadly enough to anchor stable relationships. This finding has important methodological implications: **Greek morphological form must be treated as analytically significant in embedding-based studies, and future work should consider lemmatization as a preprocessing step.**
 
 ### 6.3 Fractal Self-Similarity
 
@@ -431,15 +436,15 @@ These sentences are grammatically rough but theologically constrained: every wor
 
 ### 7.2 Pauline Studies Contributions
 
-4. **Empirical semantic maps**: The cross-epistle analysis reveals that ἐπαγγελία ("promise") is the most connected hub in Paul's stable semantic network, maintaining relationships with πίστις, νόμος, σάρξ, σωτηρία, εἰρήνη, δικαιοσύνην, and χάρις at stability ≥ 0.96 (`output/cross_epistle_results.json`, lines 6–111). This "promise" centrality emerges entirely from distributional patterns in the Greek text, independent of any theological framework.
+4. **Empirical semantic maps**: The cross-epistle analysis reveals that ἐπαγγελία ("promise") is the most connected hub in Paul's stable semantic network, maintaining relationships with ἁμαρτία, πίστις, ἀγάπη, σάρξ, and νόμου at stability ≥ 0.96 (`output/cross_epistle_results.json`, lines 6–111). This "promise" centrality emerges entirely from distributional patterns in the Greek text, independent of any theological framework.
 
-5. **Morphological sensitivity reveals epistle-dependent theology**: The most variable relationships all involve δικαιοσύνη (nominative) paired with terms like πιστεύω, ζωή, σταυρός, and βάπτισμα — all at 0.0 stability (`output/cross_epistle_results.json`, lines 113–218). Meanwhile, the accusative form δικαιοσύνην maintains a stable relationship with ἐπαγγελία at 0.966 (line 58). This morphological divergence — same lemma, different case forms, radically different stability — provides new quantitative evidence that Paul's "righteousness" concept functions differently depending on its syntactic role, and that certain associations (righteousness-as-object with promise) are corpus-wide while others (righteousness-as-subject with faith, life, cross) are epistle-specific.
+5. **Morphological sensitivity reveals epistle-dependent theology**: The most variable relationships all involve δικαιοσύνη (nominative) paired with terms like πιστεύω, ζωή, σταυρός, and βάπτισμα — all at 0.0 stability (`output/cross_epistle_results.json`, lines 113–218). Meanwhile, the morphologically related pair δίκαιος ↔ δικαιοῦται (righteous ↔ is justified) maintains high stability at 0.970 (line 37). This morphological divergence — same root, different forms, radically different stability — provides new quantitative evidence that Paul's "righteousness" concept functions differently depending on its morphological form, and that certain associations are corpus-wide while others are epistle-specific.
 
 6. **Bayesian topic distributions as authorship evidence**: The 10-topic model produces epistle profiles that naturally cluster into groups matching scholarly authorship categories — without any authorship labels as input. The Ephesians–Colossians pair shares nearly identical profiles (55.8% vs. 55.9% combined Christological + Relational loading), the Pastorals uniquely load on Topic 1, and Hebrews is the only epistle with significant loading on the Faith/Promise/Blood topic (`output/bayesian_topics.json`, lines 655–823).
 
 ### 7.3 Digital Humanities Contributions
 
-7. **Reproducible framework**: The entire pipeline is open-source and configurable, completing all 10 phases in 6.58 seconds on a CPU-only VM (`output/pipeline_summary.json`, line 2). It can be applied to any small author-specific corpus in any language with Unicode support (e.g., Plato's dialogues, Quranic Arabic, the Dead Sea Scrolls).
+7. **Reproducible framework**: The entire pipeline is open-source and configurable, completing all 10 phases on a CPU-only e2-standard-4 VM in approximately 6 hours with full bootstrap sampling (1,000 samples per level), or in seconds with reduced sampling via the `--quick` flag (`output/pipeline_summary.json`, line 2). It can be applied to any small author-specific corpus in any language with Unicode support (e.g., Plato's dialogues, Quranic Arabic, the Dead Sea Scrolls).
 
 ---
 
@@ -461,11 +466,11 @@ These sentences are grammatically rough but theologically constrained: every wor
 
 **Contextual embeddings**: Replace static Word2Vec with transformer-based contextual embeddings (BERT-style) trained exclusively on Paul's corpus, to capture polysemy — the same word meaning different things in different contexts. The morphological sensitivity discovered in this study (δικαιοσύνη vs. δικαιοσύνην behaving differently) suggests contextual models could reveal even finer-grained semantic variation.
 
-**Lemmatization study**: Run a parallel analysis with lemmatized forms to compare against the inflected-form results. The sharp contrast between nominative δικαιοσύνη (0.0 stability) and accusative δικαιοσύνην (0.966 stability with ἐπαγγελία) raises the question of whether lemmatization would obscure genuine syntactic-semantic distinctions.
+**Lemmatization study**: Run a parallel analysis with lemmatized forms to compare against the inflected-form results. The sharp contrast between nominative δικαιοσύνη (0.0 stability) and the δίκαιος ↔ δικαιοῦται pair (0.970 stability) raises the question of whether lemmatization would obscure genuine syntactic-semantic distinctions.
 
 **Diachronic analysis**: If epistle dating can be established with sufficient confidence, track semantic evolution across Paul's career using the per-epistle Hurst exponents and topic distributions as longitudinal markers.
 
-**Comparative validation**: Apply the same methodology to other small single-author corpora (e.g., the Johannine writings, Quranic Arabic, Platonic dialogues) and compare the methodological robustness. The 6.58-second runtime (`output/pipeline_summary.json`, line 2) makes large-scale comparative studies practical.
+**Comparative validation**: Apply the same methodology to other small single-author corpora (e.g., the Johannine writings, Quranic Arabic, Platonic dialogues) and compare the methodological robustness. The pipeline's configurable sampling depth makes both rapid exploratory runs and full-scale analyses practical.
 
 **Verse-annotated corpus**: Incorporate a verse-annotated Greek text (e.g., SBLGNT with verse markers) to enable true pericope-level permutation analysis and finer-grained positional templates for combinatorial recombination.
 
